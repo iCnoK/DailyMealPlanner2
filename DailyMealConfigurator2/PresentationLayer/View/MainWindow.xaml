@@ -6,27 +6,21 @@
         xmlns:local="clr-namespace:PresentationLayer"
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
         mc:Ignorable="d"
-        Title="Daily meal configurator" Height="450" Width="800"
+        Title="Daily meal configurator" Height="450" Width="1000"
         MinHeight="450" MinWidth="730">
 
     <Window.DataContext>
         <viewModel:MainWindowViewModel/>
     </Window.DataContext>
 
-    <Window.Resources>
-        <Style TargetType="TreeView">
-            <Setter Property="Selector.SelectedIndex" Value="{Binding Path=ARM, Mode=TwoWay}"/>
-        </Style>
-    </Window.Resources>
-
     <Grid>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="230"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="300*"/>
+            <ColumnDefinition Width="400"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -77,18 +71,96 @@
             </StackPanel>
             <StackPanel Grid.Row="7" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="ARM" FontSize="15" Width="130"/>
-                <Label Content="{Binding Path=ARM}" FontSize="15" Width="100"/>
+                <Label Content="{Binding Path=SelectedIndex}" FontSize="15" Width="100"/>
             </StackPanel>
             <StackPanel Grid.Row="8" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="BMR" FontSize="15" Width="130"/>
-                <Label Content="{Binding Path=BMR}" FontSize="15" Width="100"/>
+                <Label Content="{Binding Path=NestedSelectedIndex}" FontSize="15" Width="100"/>
             </StackPanel>
 
         </Grid>
 
         <Rectangle Grid.Column="1" Fill="Black"/>
 
-        <TreeView BorderThickness="0" Grid.Column="2" Background="Transparent" 
+        <!--<StackPanel Grid.Column="2" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Height="25">
+                <Button Content="ExpandAll"
+                        Command="{Binding Path=ExpandAll}"/>
+                <Button Content="CollapseAll" Margin="5,0,0,0"
+                        Command="{Binding Path=CollapseAll}"/>
+            </StackPanel>
+            
+        </StackPanel>-->
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Label Width="60" Content="Search" FontSize="15"/>
+                <TextBox Width="200" Margin="2" FontSize="15" VerticalContentAlignment="Center"
+                         Text="{Binding Path=SearchText}"/>
+                <Button Width="100" Content="Expand/collapse" Command="{Binding Path=ExpandOrCollapseAll}" 
+                        Background="Transparent" Margin="34,2,2,2"/>
+            </StackPanel>
+            
+            <ListBox Grid.Row="2" Margin="2" ScrollViewer.CanContentScroll="False"
+                 ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}">
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Edit"/>
+                        <Separator/>
+                        <MenuItem Header="Delete" Command="{Binding Path=DeleteCategory}"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Expander IsExpanded="{Binding Path=IsExpanded}">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding Path=CategoryName}"/>
+                                </StackPanel>
+                            </Expander.Header>
+                            <ListBox Background="Transparent" 
+                                 BorderThickness="0" ScrollViewer.CanContentScroll="False"
+                                 ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex}">
+                                <ListBox.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Edit"/>
+                                        <Separator/>
+                                        <MenuItem Header="Delete"/>
+                                    </ContextMenu>
+                                </ListBox.ContextMenu>
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=Name}" Margin="18,0,0,0"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Expander>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </Grid>
+        
+        
+
+
+
+        <!--<TreeView BorderThickness="0" Grid.Column="2" Background="Transparent" 
                   ItemsSource="{Binding Path=TreeViewItems}">
             <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -105,11 +177,12 @@
                     </HierarchicalDataTemplate.ItemTemplate>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
-        </TreeView>
+        </TreeView>-->
 
         <Rectangle Grid.Column="3" Fill="Black"/>
+        
+        
 
-        <TextBlock Grid.Column="4" Text="{Binding Path=TreeViewSelectedValuePath, Mode=OneWay}"/>
 
     </Grid>
 </Window>

@@ -9,8 +9,14 @@ using System.Threading.Tasks;
 
 namespace PresentationLayer.ViewModel
 {
-    public class TreeViewItem : BindableBase
+    public class MainListBoxItem : BindableBase
     {
+        public event EventHandler SelectedIndexChanged;
+        protected virtual void OnSelectedIndexChanged()
+        {
+            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         public ObservableCollection<Product> Products { get; set; }
 
         private string categoryName;
@@ -35,14 +41,21 @@ namespace PresentationLayer.ViewModel
             }
         }
 
-        private bool isSelected;
-        public bool IsSelected
+        private int selectedIndex;
+        public int SelectedIndex
         {
-            get => isSelected;
-            set { isSelected = value; RaisePropertyChanged("IsSelected"); }
+            get => selectedIndex;
+            set { selectedIndex = value; OnSelectedIndexChanged(); RaisePropertyChanged("SelectedIndex"); }
         }
 
-        public TreeViewItem(Category category)
+        private bool isExpanded;
+        public bool IsExpanded
+        {
+            get => isExpanded;
+            set { isExpanded = value; RaisePropertyChanged("IsExpanded"); }
+        }
+
+        public MainListBoxItem(Category category)
         {
             Products = new ObservableCollection<Product>();
             CategoryName = category.Name;
