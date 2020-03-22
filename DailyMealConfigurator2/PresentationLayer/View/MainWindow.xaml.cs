@@ -14,6 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DataAccessLayer.DataAccess;
+using PresentationLayer.ViewModel;
+using PresentationLayer.Utility;
 
 namespace PresentationLayer
 {
@@ -25,12 +27,20 @@ namespace PresentationLayer
         public MainWindow()
         {
             InitializeComponent();
+
+            this.DataContext = new MainWindowViewModel();
+            (this.DataContext as MainWindowViewModel).MessageBoxRequest += new EventHandler<MvvmMessageBoxEventArgs>(MainWindow_MessageBoxRequest);
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex(@"\d+");
             e.Handled = !regex.IsMatch(e.Text);
+        }
+
+        private void MainWindow_MessageBoxRequest(object sender, MvvmMessageBoxEventArgs e)
+        {
+            e.Show();
         }
     }
 }

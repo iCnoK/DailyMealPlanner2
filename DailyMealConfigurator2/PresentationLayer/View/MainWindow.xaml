@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PresentationLayer"
+        xmlns:view="clr-namespace:PresentationLayer.View"
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
         mc:Ignorable="d"
-        Title="Daily meal configurator" Height="450" Width="1000"
-        MinHeight="450" MinWidth="730">
+        Title="Daily meal configurator" Height="450" Width="1050"
+        MinHeight="450" MinWidth="1050">
 
     <Window.DataContext>
         <viewModel:MainWindowViewModel/>
@@ -71,26 +72,16 @@
             </StackPanel>
             <StackPanel Grid.Row="7" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="ARM" FontSize="15" Width="130"/>
-                <Label Content="{Binding Path=SelectedIndex}" FontSize="15" Width="100"/>
+                <Label Content="{Binding Path=ARM}" FontSize="15" Width="100"/>
             </StackPanel>
             <StackPanel Grid.Row="8" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="BMR" FontSize="15" Width="130"/>
-                <Label Content="{Binding Path=NestedSelectedIndex}" FontSize="15" Width="100"/>
+                <Label Content="{Binding Path=BMR}" FontSize="15" Width="100"/>
             </StackPanel>
 
         </Grid>
 
-        <Rectangle Grid.Column="1" Fill="Black"/>
-
-        <!--<StackPanel Grid.Column="2" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal" Height="25">
-                <Button Content="ExpandAll"
-                        Command="{Binding Path=ExpandAll}"/>
-                <Button Content="CollapseAll" Margin="5,0,0,0"
-                        Command="{Binding Path=CollapseAll}"/>
-            </StackPanel>
-            
-        </StackPanel>-->
+        <Rectangle Grid.Column="1" Fill="Gray"/>
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
@@ -105,12 +96,13 @@
                 <Button Width="100" Content="Expand/collapse" Command="{Binding Path=ExpandOrCollapseAll}" 
                         Background="Transparent" Margin="34,2,2,2"/>
             </StackPanel>
-            
+
             <ListBox Grid.Row="2" Margin="2" ScrollViewer.CanContentScroll="False"
-                 ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}">
+                 ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}"
+                     IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Edit"/>
+                        <MenuItem Header="Edit" Command="{Binding Path=EditCategory}"/>
                         <Separator/>
                         <MenuItem Header="Delete" Command="{Binding Path=DeleteCategory}"/>
                     </ContextMenu>
@@ -122,7 +114,7 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Expander IsExpanded="{Binding Path=IsExpanded}">
+                        <Expander IsExpanded="{Binding Path=IsExpanded}" ExpandDirection="Down">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="{Binding Path=CategoryName}"/>
@@ -133,9 +125,9 @@
                                  ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex}">
                                 <ListBox.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Edit"/>
+                                        <MenuItem Header="Edit" Command="{Binding Path=EditProduct}"/>
                                         <Separator/>
-                                        <MenuItem Header="Delete"/>
+                                        <MenuItem Header="Delete" Command="{Binding Path=DeleteProduct}"/>
                                     </ContextMenu>
                                 </ListBox.ContextMenu>
                                 <ListBox.ItemsPanel>
@@ -155,9 +147,54 @@
             </ListBox>
 
         </Grid>
-        
-        
 
+        <Rectangle Grid.Column="3" Fill="Gray"/>
+
+        <Grid Grid.Column="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Rectangle Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"  Fill="Gray"/>
+
+            <Rectangle Grid.Row="0" Grid.Column="0" Margin="0,5,3,0" Fill="{Binding Path=ProductEditorRectangleFill}"/>
+            <Rectangle Grid.Row="0" Grid.Column="1" Margin="0,5,3,0" Fill="{Binding Path=CategoryEditorRectangleFill}"/>
+            <Rectangle Grid.Row="0" Grid.Column="2" Margin="0,5,0,0" Fill="{Binding Path=MealTimesRectangleFill}"/>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Product editor" FontSize="15" 
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+            <Label Grid.Row="0" Grid.Column="1" Content="Category editor" FontSize="15" 
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+            <Label Grid.Row="0" Grid.Column="2" Content="Meal times" FontSize="15" 
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+
+
+            <view:Editor Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                         DataContext="{Binding Path=ProductEditorStatus}"/>
+            <view:CategoryEditor Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                                 DataContext="{Binding Path=CategoryEditorStatus}"/>
+        </Grid>
+        
+        
+        <StackPanel Grid.Column="4" Orientation="Vertical">
+            
+            <!--<StackPanel Orientation="Horizontal" Height="35">
+                <Button Content="Product editor" FontSize="15" Width="120" Margin="2"
+                        Command="{Binding Path=ShowProductEditor}"/>
+                <Button Content="Category editor" FontSize="15" Width="120" Margin="2"
+                        Command="{Binding Path=ShowCategoryEditor}"/>
+                <Button Content="Meal times" FontSize="15" Width="120" Margin="2"
+                        Command="{Binding Path=ShowMealTimes}"/>
+            </StackPanel>-->
+            
+        </StackPanel>
 
 
         <!--<TreeView BorderThickness="0" Grid.Column="2" Background="Transparent" 
@@ -179,9 +216,9 @@
             </TreeView.ItemTemplate>
         </TreeView>-->
 
-        <Rectangle Grid.Column="3" Fill="Black"/>
-        
-        
+
+
+
 
 
     </Grid>

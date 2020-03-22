@@ -10,13 +10,27 @@ using System.Xml.Serialization;
 
 namespace BusinessLayer.Utility
 {
-    public  class Product
+    public class Product
     {
-        public Product(string name, int gramms, double protein, double fats, double carbs, double calories)
+        private Product(string name, int gramms, double protein, double fats, double carbs, double calories, bool flag = false)
         {
             Name = name;
             Gramms = gramms;
-            Protein = protein;
+            Proteins = protein;
+            Fats = fats;
+            Carbs = carbs;
+            Calories = calories;
+        }
+
+        public Product(string name, int gramms, double protein, double fats, double carbs, double calories)
+        {
+            if (!IsValid(new Product(name, gramms, protein, fats, carbs, calories, true)))
+            {
+                throw new Exception("Parameters are incorrect");
+            }
+            Name = name;
+            Gramms = gramms;
+            Proteins = protein;
             Fats = fats;
             Carbs = carbs;
             Calories = calories;
@@ -31,7 +45,7 @@ namespace BusinessLayer.Utility
         [XmlElement]
         public int Gramms { get; protected set; }
         [XmlElement]
-        public double Protein { get; protected set; }
+        public double Proteins { get; protected set; }
         [XmlElement]
         public double Fats { get; protected set; }
         [XmlElement]
@@ -40,12 +54,13 @@ namespace BusinessLayer.Utility
         public double Calories { get; protected set; }
         public static bool IsValid(Product product)
         {
-            List<IRule> rules = new List<IRule>()
+            List<IProductRule> rules = new List<IProductRule>()
             {
                 new NameRule(), 
                 new GrammsRule(), 
-                new ProteinRule(), 
+                new ProteinsRule(), 
                 new FatsRule(), 
+                new CarbsRule(),
                 new CaloriesRule()
             };
             for (int i = 0; i < rules.Count; i++)
@@ -56,6 +71,21 @@ namespace BusinessLayer.Utility
                 }
             }
             return true;
+        }
+        public static bool IsValid(string name, int gramms, double protein, double fats, double carbs, double calories)
+        {
+            var nameRule = new NameRule();
+            var grammsRule = new GrammsRule();
+            var proteinsRule = new ProteinsRule();
+            var fatsRule = new FatsRule();
+            var carbsRule = new CarbsRule();
+            var caloriesRule = new CaloriesRule();
+            return nameRule.ApplyRule(name)
+                   && grammsRule.ApplyRule(gramms)
+                   && proteinsRule.ApplyRule(protein)
+                   && fatsRule.ApplyRule(fats)
+                   && carbsRule.ApplyRule(carbs)
+                   && caloriesRule.ApplyRule(calories);
         }
     }
 }

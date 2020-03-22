@@ -1,4 +1,6 @@
 ﻿using BusinessLayer.Utility;
+using PresentationLayer.Utility;
+using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
@@ -6,18 +8,42 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace PresentationLayer.ViewModel
 {
     public class MainListBoxItem : BindableBase
     {
-        public event EventHandler SelectedIndexChanged;
-        protected virtual void OnSelectedIndexChanged()
+        public Product this[int index]
         {
-            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+            get => Products[index];
+            set => Products[index] = value;
+        }
+
+        public event EventHandler SelectedIndexChanged;
+        protected virtual void OnSelectedIndexChanged(EventArgs args)
+        {
+            SelectedIndexChanged?.Invoke(this, args);
+        }
+        public event EventHandler EditEventRaise;
+        protected virtual void OnEditEventRaise()
+        {
+            EditEventRaise?.Invoke(this, EventArgs.Empty);
         }
 
         public ObservableCollection<Product> Products { get; set; }
+
+        private ICommand editProduct;
+        private ICommand deleteProduct;
+
+        public ICommand EditProduct => editProduct ?? (editProduct = new DelegateCommand<object>(delegate (object obj)
+        {
+            OnEditEventRaise();
+        }));
+        public ICommand DeleteProduct => deleteProduct ?? (deleteProduct = new DelegateCommand<object>(delegate (object obj)
+        {
+            Products.RemoveAt(SelectedIndex);
+        }));
 
         private string categoryName;
         public string CategoryName
@@ -45,7 +71,12 @@ namespace PresentationLayer.ViewModel
         public int SelectedIndex
         {
             get => selectedIndex;
-            set { selectedIndex = value; OnSelectedIndexChanged(); RaisePropertyChanged("SelectedIndex"); }
+            set 
+            { 
+                selectedIndex = value; 
+                OnSelectedIndexChanged(EventArgs.Empty); 
+                RaisePropertyChanged("SelectedIndex"); 
+            }
         }
 
         private bool isExpanded;
@@ -55,8 +86,21 @@ namespace PresentationLayer.ViewModel
             set { isExpanded = value; RaisePropertyChanged("IsExpanded"); }
         }
 
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                isSelected = value;
+                OnSelectedIndexChanged(EventArgs.Empty);
+                RaisePropertyChanged("IsSelected");
+            }
+        }
+
         public MainListBoxItem(Category category)
         {
+            IsSelected = false;
             Products = new ObservableCollection<Product>();
             CategoryName = category.Name;
             Description = category.Description;
@@ -64,6 +108,11 @@ namespace PresentationLayer.ViewModel
             {
                 Products.Add(item);
             }
+        }
+
+        public Category GetCategory()
+        {
+            return new Category(CategoryName, Description, new List<Product>(Products.ToList<Product>()));
         }
     }
 }

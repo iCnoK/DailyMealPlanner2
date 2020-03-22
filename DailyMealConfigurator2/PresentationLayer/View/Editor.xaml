@@ -4,10 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PresentationLayer.View"
+             xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="400" Background="White">
+             d:DesignHeight="450" d:DesignWidth="400" Background="Transparent"
+             Visibility="{Binding Path=Visibility}">
+
+    <UserControl.DataContext>
+        <viewModel:EditorViewModel/>
+    </UserControl.DataContext>
+    
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
             <RowDefinition Height="35"/>
             <RowDefinition Height="35"/>
             <RowDefinition Height="35"/>
@@ -25,46 +33,46 @@
 
         <StackPanel Grid.Row="1" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Name" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
-                         PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <!--<Label Content="years" FontSize="15" Width="60"/>-->
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+                         Text="{Binding Path=Name}"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Gramms" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <Label Content="years" FontSize="15" Width="60"/>
+                         Text="{Binding Path=Gramms}"/>
         </StackPanel>
         <StackPanel Grid.Row="3" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Proteins" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <Label Content="years" FontSize="15" Width="60"/>
+                         Text="{Binding Path=Proteins}"/>
         </StackPanel>
         <StackPanel Grid.Row="4" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Fats" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <Label Content="years" FontSize="15" Width="60"/>
+                         Text="{Binding Path=Fats}"/>
         </StackPanel>
         <StackPanel Grid.Row="5" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Carbs" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <Label Content="years" FontSize="15" Width="60"/>
+                         Text="{Binding Path=Carbs}"/>
         </StackPanel>
         <StackPanel Grid.Row="6" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
             <Label Content="Calories" FontSize="15" Width="100"/>
-            <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center" Margin="2"
+            <TextBox Width="250" FontSize="15" VerticalContentAlignment="Center" Margin="2"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
-            <Label Content="years" FontSize="15" Width="60"/>
+                         Text="{Binding Path=Calories}"/>
         </StackPanel>
-        
+
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Grid.Row="7" Content="Save" FontSize="15" Margin="3,2,2,2" Width="173"
+                Command="{Binding Path=SaveProduct}"/>
+            <Button Grid.Row="7" Content="Return" FontSize="15" Margin="2" Width="173"
+                Command="{Binding Path=ReturnProduct}"/>
+        </StackPanel>
+
     </Grid>
 </UserControl>

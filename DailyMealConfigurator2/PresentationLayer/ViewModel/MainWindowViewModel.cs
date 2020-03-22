@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.Enums;
+using BusinessLayer.Utility;
 using DataAccessLayer.DataAccess;
+using PresentationLayer.Utility;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
@@ -8,7 +10,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 //private string text;
 //public string Text
@@ -25,6 +29,29 @@ namespace PresentationLayer.ViewModel
 {
     public class MainWindowViewModel : BindableBase
     {
+        public event EventHandler<MvvmMessageBoxEventArgs> MessageBoxRequest;
+        protected void MessageBox_Show(Action<MessageBoxResult> resultAction, string messageBoxText, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None, MessageBoxResult defaultResult = MessageBoxResult.None, MessageBoxOptions options = MessageBoxOptions.None)
+        {
+            if (this.MessageBoxRequest != null)
+            {
+                this.MessageBoxRequest(this, new MvvmMessageBoxEventArgs(resultAction, messageBoxText, caption, button, icon, defaultResult, options));
+            }
+        }
+
+        //protected void AskTheQuestion()
+        //{
+        //    MessageBox_Show(ProcessTheAnswer, "Are you sure you want to do this?", "Alert", System.Windows.MessageBoxButton.YesNo);
+        //}
+
+        //public void ProcessTheAnswer(MessageBoxResult result)
+        //{
+        //    if (result == MessageBoxResult.Yes)
+        //    {
+        //        // Do something
+        //    }
+        //}
+
+
         #region UserInfo
         #region TextBoxes
         private int age;
@@ -111,7 +138,6 @@ namespace PresentationLayer.ViewModel
         #endregion
         #endregion
         #region Categories
-
         #region Buttons
         private ICommand expandOfCollapseAll;
         private ICommand editCategory;
@@ -133,13 +159,20 @@ namespace PresentationLayer.ViewModel
         }));
         public ICommand EditCategory => editCategory ?? (editCategory = new DelegateCommand<object>(delegate (object obj)
         {
-            
+            CategoryEditorStatus.ShowCategory(MainListBoxItems[SelectedIndex].GetCategory());
+            CategoriesListBoxIsEnabled = false;
+            CategoryEditorFocus();
+            //ShowCategoryEditor.Execute(null);
         }));
         public ICommand DeleteCategory => deleteCategory ?? (deleteCategory = new DelegateCommand<object>(delegate (object obj)
         {
             MainListBoxItems.RemoveAt(SelectedIndex);
         }));
         #endregion
+
+        public EditorViewModel ProductEditorStatus { get; set; }
+
+        public CategoryEditorViewModel CategoryEditorStatus { get; set; }
 
         public ObservableCollection<MainListBoxItem> MainListBoxItems { get; set; }
 
@@ -164,6 +197,13 @@ namespace PresentationLayer.ViewModel
             set { searchText = value; RaisePropertyChanged("SearchText"); }
         }
 
+        private bool categoriesListBoxIsEnabled;
+        public bool CategoriesListBoxIsEnabled
+        {
+            get => categoriesListBoxIsEnabled;
+            set { categoriesListBoxIsEnabled = value; RaisePropertyChanged("CategoriesListBoxIsEnabled"); }
+        }
+
         private void ExpandAllExpanders()
         {
             foreach (var item in MainListBoxItems)
@@ -180,21 +220,190 @@ namespace PresentationLayer.ViewModel
             }
         }
         #endregion
+        #region Editors and meal time
+        private readonly SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
+        private readonly SolidColorBrush FocusBrush = new SolidColorBrush(Colors.White);
+
+        private SolidColorBrush productEditorRectangleFill;
+        public SolidColorBrush ProductEditorRectangleFill
+        {
+            get => productEditorRectangleFill;
+            set { productEditorRectangleFill = value; RaisePropertyChanged("ProductEditorRectangleFill"); }
+        }
+
+        private SolidColorBrush categoryEditorRectangleFill;
+        public SolidColorBrush CategoryEditorRectangleFill
+        {
+            get => categoryEditorRectangleFill;
+            set { categoryEditorRectangleFill = value; RaisePropertyChanged("CategoryEditorRectangleFill"); }
+        }
+
+        private SolidColorBrush mealTimesRectangleFill;
+        public SolidColorBrush MealTimesRectangleFill
+        {
+            get => mealTimesRectangleFill;
+            set { mealTimesRectangleFill = value; RaisePropertyChanged("MealTimesRectangleFill"); }
+        }
+
+        private void ProductEditorFocus()
+        {
+            ProductEditorStatus.Visibility = System.Windows.Visibility.Visible;
+            CategoryEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
+            //
+            ProductEditorRectangleFill = FocusBrush;
+            CategoryEditorRectangleFill = TransparentBrush;
+            MealTimesRectangleFill = TransparentBrush;
+        }
+
+        private void CategoryEditorFocus()
+        {
+            ProductEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
+            CategoryEditorStatus.Visibility = System.Windows.Visibility.Visible;
+            //
+            ProductEditorRectangleFill = TransparentBrush;
+            CategoryEditorRectangleFill = FocusBrush;
+            MealTimesRectangleFill = TransparentBrush;
+        }
+
+        private void MealTimesFocus()
+        {
+            ProductEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
+            CategoryEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
+            //
+            ProductEditorRectangleFill = TransparentBrush;
+            CategoryEditorRectangleFill = TransparentBrush;
+            MealTimesRectangleFill = FocusBrush;
+        }
+        #endregion
 
         public MainWindowViewModel()
         {
+            CategoriesListBoxIsEnabled = true;
+            ProductEditorStatus = new EditorViewModel();
+            CategoryEditorStatus = new CategoryEditorViewModel();
+
+            //ShowMealTimes.Execute(null);
+
+            MealTimesFocus();
+
             Database dataBase = new Database(DataAccessLayer.Enums.DatabaseType.DefaultFile);
             MainListBoxItems = new ObservableCollection<MainListBoxItem>();
             foreach (var item in dataBase.Categories)
             {
                 MainListBoxItems.Add(new MainListBoxItem(item));
                 MainListBoxItems[MainListBoxItems.Count - 1].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
+                MainListBoxItems[MainListBoxItems.Count - 1].EditEventRaise += MainWindowViewModel_EditEventRaise; ;
             }
+            ProductEditorStatus.EditEnded += ProductEditorStatus_EditEnded;
+            CategoryEditorStatus.EditEnded += CategoryEditorStatus_EditEnded;
+
+        }
+
+        private void ProductEditorStatus_EditEnded(object sender, EventArgs e)
+        {
+            SenderTypeEventArgs args = (SenderTypeEventArgs)e;
+
+            if (string.Equals(args.Name, "save"))
+            {
+                if (Product.IsValid(
+                name: ProductEditorStatus.Name,
+                gramms: ProductEditorStatus.Gramms,
+                protein: ProductEditorStatus.Proteins,
+                fats: ProductEditorStatus.Fats,
+                carbs: ProductEditorStatus.Carbs,
+                calories: ProductEditorStatus.Calories))
+                {
+                    MainListBoxItems[SelectedIndex][NestedSelectedIndex] = ProductEditorStatus.GetProduct();
+                    ProductEditorStatus.Clear();
+                    CategoriesListBoxIsEnabled = true;
+                    MealTimesFocus();
+                }
+                else
+                {
+                    MessageBox_Show(null, "Invalid parameters! Saving was failed!", "Error", MessageBoxButton.OK,
+                        MessageBoxImage.Error, MessageBoxResult.OK);
+                }
+
+            }
+            else if (string.Equals(args.Name, "return"))
+            {
+                ProductEditorStatus.Clear();
+                CategoriesListBoxIsEnabled = true;
+                MealTimesFocus();
+            }
+        }
+
+        private void CategoryEditorStatus_EditEnded(object sender, EventArgs e)
+        {
+            SenderTypeEventArgs args = (SenderTypeEventArgs)e;
+
+            if (string.Equals(args.Name, "save"))
+            {
+                if (Category.IsValid(
+                    name: CategoryEditorStatus.Name, description: CategoryEditorStatus.Description))
+                {
+                    int selectedIndexCopy = SelectedIndex;
+                    MainListBoxItems[selectedIndexCopy].SelectedIndexChanged -= MainWindowViewModel_SelectedIndexChanged;
+                    MainListBoxItems[selectedIndexCopy].EditEventRaise -= MainWindowViewModel_EditEventRaise;
+                    MainListBoxItems[selectedIndexCopy] = new MainListBoxItem(CategoryEditorStatus.GetCategory());
+                    MainListBoxItems[selectedIndexCopy].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
+                    MainListBoxItems[selectedIndexCopy].EditEventRaise += MainWindowViewModel_EditEventRaise;
+                    CategoryEditorStatus.Clear();
+                    CategoriesListBoxIsEnabled = true;
+                    MealTimesFocus();
+                    SelectedIndex = selectedIndexCopy;
+                }
+                else
+                {
+                    MessageBox_Show(null, "Invalid parameters! Saving was failed!", "Error", MessageBoxButton.OK,
+                        MessageBoxImage.Error, MessageBoxResult.OK);
+                }
+            }
+            else if (string.Equals(args.Name, "return"))
+            {
+                CategoryEditorStatus.Clear();
+                CategoriesListBoxIsEnabled = true;
+                MealTimesFocus();
+            }
+        }
+
+        private void MainWindowViewModel_EditEventRaise(object sender, EventArgs e)
+        {
+            CategoriesListBoxIsEnabled = false;
+            ProductEditorFocus();
+            //ShowProductEditor.Execute(null);
+            Product product = MainListBoxItems[SelectedIndex][NestedSelectedIndex];
+            ProductEditorStatus.ShowProduct(product);
         }
 
         private void MainWindowViewModel_SelectedIndexChanged(object sender, EventArgs e)
         {
             NestedSelectedIndex = MainListBoxItems[SelectedIndex].SelectedIndex;
+            //SenderNameEventArgs<int> eventArgs = (SenderNameEventArgs<int>)e;
+
+            //if (string.Equals(eventArgs.Name, "SelectedIndex"))
+            //{
+            //}
+            //else if (string.Equals(eventArgs.Name, "IsSelected"))
+            //{
+            //    int index = GetNestedSelectedElementIndex();
+            //    if (index != -1)
+            //    {
+            //        MainListBoxItems[SelectedIndex].SelectedIndex = index;
+            //    }
+            //}
         }
+
+        //private int GetNestedSelectedElementIndex()
+        //{
+        //    for (int i = 0; i < MainListBoxItems.Count; i++)
+        //    {
+        //        if (MainListBoxItems[i].IsSelected)
+        //        {
+        //            return i;
+        //        }
+        //    }
+        //    return -1;
+        //}
     }
 }

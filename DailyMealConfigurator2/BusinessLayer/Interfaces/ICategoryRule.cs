@@ -2,8 +2,8 @@
 
 namespace BusinessLayer.Interfaces
 {
-    public interface IRule
+    public interface ICategoryRule
     {
-        bool ApplyRule(Product product);
+        bool ApplyRule(Category category);
     }
 }

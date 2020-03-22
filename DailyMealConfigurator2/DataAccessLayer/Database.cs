@@ -12,15 +12,35 @@ using XSerializer;
 namespace DataAccessLayer.DataAccess
 {
     public class Database
-    {//log 
+    {
         public List<Category> Categories { get; private set; }
 
         private readonly string DefaultDatabaseFile = Environment.CurrentDirectory + "\\" + "ddb.xml";
 
         public string CustomDatabaseFile { get; private set; }
 
+        public Database()
+        {
+            CustomDatabaseFile = Environment.CurrentDirectory + "\\" + "CustomDatabase.xml";
+            if (File.Exists(CustomDatabaseFile))
+            {
+                LoadDatabase(DatabaseType.CustomFile, CustomDatabaseFile);
+            }
+            else if (File.Exists(DefaultDatabaseFile))
+            {
+                LoadDatabase(DatabaseType.DefaultFile);
+            }
+        }
+
         public Database(DatabaseType type, string customDatabaseFile = null)
         {
+            LoadDatabase(type, customDatabaseFile);
+        }
+
+        private void LoadDatabase(DatabaseType type, string customDatabaseFile = null)
+        {
+            Logger Logger = new Logger(Environment.CurrentDirectory + "\\" + "DatabaseLog.txt");
+            Logger.LogInformation($"Database loading type: {type}.");
             CustomDatabaseFile = Environment.CurrentDirectory + "\\" + "CustomDatabase.xml";
             if (type == DatabaseType.DefaultFile)
             {
@@ -29,12 +49,23 @@ namespace DataAccessLayer.DataAccess
             else if (type == DatabaseType.CustomFile && !string.IsNullOrEmpty(customDatabaseFile))
             {
                 CustomDatabaseFile = customDatabaseFile;
-                Categories = Deserialize();
+                try
+                {
+                    Categories = Deserialize();
+                }
+                catch (Exception)
+                {
+                    Logger.LogInformation($"Database loading failed. Trying to load default database.");
+                    Categories = GetCategories();
+                }
+                Logger.LogInformation($"Deserialization database loading successfully completed.");
             }
             else
             {
                 Categories = Deserialize();
             }
+            Logger.LogInformation($"Database successfully loaded.");
+            Logger.Close();
         }
 
         public void Serialize()

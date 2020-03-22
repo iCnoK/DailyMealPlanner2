@@ -3,20 +3,20 @@ using BusinessLayer.Utility;
 
 namespace BusinessLayer.Rules
 {
-    public class FatsRule : IProductRule
+    public class ProteinsRule : IProductRule
     {
         public bool ApplyRule(Product product)
         {
-            if (product.Fats <= 0)
+            if (product.Proteins <= 0)
             {
                 return false;
             }
             return true;
         }
 
-        public bool ApplyRule(double fats)
+        public bool ApplyRule(double proteins)
         {
-            if (fats <= 0)
+            if (proteins <= 0)
             {
                 return false;
             }
