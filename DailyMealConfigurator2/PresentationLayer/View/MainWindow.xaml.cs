@@ -29,7 +29,7 @@ namespace PresentationLayer
             InitializeComponent();
 
             this.DataContext = new MainWindowViewModel();
-            (this.DataContext as MainWindowViewModel).MessageBoxRequest += new EventHandler<MvvmMessageBoxEventArgs>(MainWindow_MessageBoxRequest);
+            (this.DataContext as MainWindowViewModel).MessageBoxRequest += new EventHandler<MessageBoxEventArgs>(MainWindow_MessageBoxRequest);
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -38,7 +38,7 @@ namespace PresentationLayer
             e.Handled = !regex.IsMatch(e.Text);
         }
 
-        private void MainWindow_MessageBoxRequest(object sender, MvvmMessageBoxEventArgs e)
+        private void MainWindow_MessageBoxRequest(object sender, MessageBoxEventArgs e)
         {
             e.Show();
         }

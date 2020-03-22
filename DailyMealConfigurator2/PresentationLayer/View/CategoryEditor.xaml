@@ -41,7 +41,7 @@
             <Button Grid.Row="7" Content="Save" FontSize="15" Margin="3,2,2,2" Width="173"
                 Command="{Binding Path=SaveCategory}"/>
             <Button Grid.Row="7" Content="Return" FontSize="15" Margin="2" Width="173"
-                Command="{Binding Path=ReturnProduct}"/>
+                Command="{Binding Path=ReturnCategory}"/>
         </StackPanel>
 
     </Grid>

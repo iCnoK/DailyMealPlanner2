@@ -52,6 +52,20 @@ namespace BusinessLayer.Utility
         public double Carbs { get; protected set; }
         [XmlElement]
         public double Calories { get; protected set; }
+        //[NonSerialized]
+        public string GetToolTipView
+        {
+            get
+            {
+                return $"Name: {Name}\n" +
+                    $"Gramms: {Gramms}\n" +
+                    $"Proteins: {Proteins}\n" +
+                    $"Fats: {Fats}\n" +
+                    $"Carbs: {Carbs}\n" +
+                    $"Calories: {Calories}";
+            }
+        }
+
         public static bool IsValid(Product product)
         {
             List<IProductRule> rules = new List<IProductRule>()

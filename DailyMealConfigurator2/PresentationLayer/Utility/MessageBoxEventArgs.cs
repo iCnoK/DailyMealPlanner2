@@ -7,9 +7,9 @@ using System.Windows;
 
 namespace PresentationLayer.Utility
 {
-    public class MvvmMessageBoxEventArgs : EventArgs
+    public class MessageBoxEventArgs : EventArgs
     {
-        public MvvmMessageBoxEventArgs(Action<MessageBoxResult> resultAction, string messageBoxText, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None, MessageBoxResult defaultResult = MessageBoxResult.None, MessageBoxOptions options = MessageBoxOptions.None)
+        public MessageBoxEventArgs(Action<MessageBoxResult> resultAction, string messageBoxText, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None, MessageBoxResult defaultResult = MessageBoxResult.None, MessageBoxOptions options = MessageBoxOptions.None)
         {
             this.resultAction = resultAction;
             this.messageBoxText = messageBoxText;

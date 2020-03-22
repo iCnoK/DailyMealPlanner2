@@ -7,7 +7,7 @@
         xmlns:view="clr-namespace:PresentationLayer.View"
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
         mc:Ignorable="d"
-        Title="Daily meal configurator" Height="450" Width="1050"
+        Title="Daily meal configurator" Height="550" Width="1050"
         MinHeight="450" MinWidth="1050">
 
     <Window.DataContext>
@@ -15,7 +15,6 @@
     </Window.DataContext>
 
     <Grid>
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="230"/>
             <ColumnDefinition Width="5"/>
@@ -93,18 +92,21 @@
                 <Label Width="60" Content="Search" FontSize="15"/>
                 <TextBox Width="200" Margin="2" FontSize="15" VerticalContentAlignment="Center"
                          Text="{Binding Path=SearchText}"/>
-                <Button Width="100" Content="Expand/collapse" Command="{Binding Path=ExpandOrCollapseAll}" 
-                        Background="Transparent" Margin="34,2,2,2"/>
+                <!--<Button Width="100" Content="Expand/collapse" Command="{Binding Path=ExpandOrCollapseAll}" 
+                        Background="Transparent" Margin="34,2,2,2"/>-->
             </StackPanel>
 
             <ListBox Grid.Row="2" Margin="2" ScrollViewer.CanContentScroll="False"
-                 ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}"
+                     ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}"
                      IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Edit" Command="{Binding Path=EditCategory}"/>
+                        <MenuItem Header="Add product" Command="{Binding Path=AddProduct}"/>
                         <Separator/>
-                        <MenuItem Header="Delete" Command="{Binding Path=DeleteCategory}"/>
+                        <MenuItem Header="Add category" Command="{Binding Path=AddCategory}"/>
+                        <MenuItem Header="Edit category" Command="{Binding Path=EditCategory}"/>
+                        <Separator/>
+                        <MenuItem Header="Delete category" Command="{Binding Path=DeleteCategory}"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemsPanel>
@@ -114,10 +116,15 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Expander IsExpanded="{Binding Path=IsExpanded}" ExpandDirection="Down">
+                        <Expander ExpandDirection="Down"
+                                IsExpanded="{Binding Mode=TwoWay, Path=IsSelected, 
+                                RelativeSource={RelativeSource AncestorType=ListBoxItem, Mode=FindAncestor}}">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding Path=CategoryName}"/>
+                                    <Label Width="30" Content="{Binding Path=Products.Count, Mode=OneWay}"
+                                           ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
+                                    <Label Content="{Binding Path=CategoryName}" 
+                                           ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
                                 </StackPanel>
                             </Expander.Header>
                             <ListBox Background="Transparent" 
@@ -125,9 +132,9 @@
                                  ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex}">
                                 <ListBox.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="Edit" Command="{Binding Path=EditProduct}"/>
+                                        <MenuItem Header="Edit product" Command="{Binding Path=EditProduct}"/>
                                         <Separator/>
-                                        <MenuItem Header="Delete" Command="{Binding Path=DeleteProduct}"/>
+                                        <MenuItem Header="Delete product" Command="{Binding Path=DeleteProduct}"/>
                                     </ContextMenu>
                                 </ListBox.ContextMenu>
                                 <ListBox.ItemsPanel>
@@ -137,7 +144,8 @@
                                 </ListBox.ItemsPanel>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Path=Name}" Margin="18,0,0,0"/>
+                                        <TextBlock Text="{Binding Path=Name}" Margin="18,0,0,0"
+                                                   ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -164,15 +172,15 @@
 
             <Rectangle Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"  Fill="Gray"/>
 
-            <Rectangle Grid.Row="0" Grid.Column="0" Margin="0,5,3,0" Fill="{Binding Path=ProductEditorRectangleFill}"/>
+            <Rectangle Grid.Row="0" Grid.Column="2" Margin="0,5,3,0" Fill="{Binding Path=ProductEditorRectangleFill}"/>
             <Rectangle Grid.Row="0" Grid.Column="1" Margin="0,5,3,0" Fill="{Binding Path=CategoryEditorRectangleFill}"/>
-            <Rectangle Grid.Row="0" Grid.Column="2" Margin="0,5,0,0" Fill="{Binding Path=MealTimesRectangleFill}"/>
+            <Rectangle Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" Fill="{Binding Path=MealTimesRectangleFill}"/>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Product editor" FontSize="15" 
+            <Label Grid.Row="0" Grid.Column="2" Content="Product editor" FontSize="15" 
                    HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
             <Label Grid.Row="0" Grid.Column="1" Content="Category editor" FontSize="15" 
                    HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-            <Label Grid.Row="0" Grid.Column="2" Content="Meal times" FontSize="15" 
+            <Label Grid.Row="0" Grid.Column="0" Content="Meal times" FontSize="15" 
                    HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
 
 
@@ -181,45 +189,6 @@
             <view:CategoryEditor Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                                  DataContext="{Binding Path=CategoryEditorStatus}"/>
         </Grid>
-        
-        
-        <StackPanel Grid.Column="4" Orientation="Vertical">
-            
-            <!--<StackPanel Orientation="Horizontal" Height="35">
-                <Button Content="Product editor" FontSize="15" Width="120" Margin="2"
-                        Command="{Binding Path=ShowProductEditor}"/>
-                <Button Content="Category editor" FontSize="15" Width="120" Margin="2"
-                        Command="{Binding Path=ShowCategoryEditor}"/>
-                <Button Content="Meal times" FontSize="15" Width="120" Margin="2"
-                        Command="{Binding Path=ShowMealTimes}"/>
-            </StackPanel>-->
-            
-        </StackPanel>
-
-
-        <!--<TreeView BorderThickness="0" Grid.Column="2" Background="Transparent" 
-                  ItemsSource="{Binding Path=TreeViewItems}">
-            <TreeView.Resources>
-                <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                </Style>
-            </TreeView.Resources>
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=Products}">
-                    <TextBlock Text="{Binding Path=CategoryName}"/>
-                    <HierarchicalDataTemplate.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Path=Name}"/>
-                        </DataTemplate>
-                    </HierarchicalDataTemplate.ItemTemplate>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>-->
-
-
-
-
-
 
     </Grid>
 </Window>

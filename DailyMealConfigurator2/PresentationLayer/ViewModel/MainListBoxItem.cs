@@ -33,9 +33,14 @@ namespace PresentationLayer.ViewModel
 
         public ObservableCollection<Product> Products { get; set; }
 
+        //private ICommand addProduct;
         private ICommand editProduct;
         private ICommand deleteProduct;
 
+        //public ICommand AddProduct => addProduct ?? (addProduct = new DelegateCommand<object>(delegate (object obj)
+        //{
+            
+        //}));
         public ICommand EditProduct => editProduct ?? (editProduct = new DelegateCommand<object>(delegate (object obj)
         {
             OnEditEventRaise();
@@ -86,21 +91,30 @@ namespace PresentationLayer.ViewModel
             set { isExpanded = value; RaisePropertyChanged("IsExpanded"); }
         }
 
-        private bool isSelected;
-        public bool IsSelected
+        public string GetToolTipView
         {
-            get => isSelected;
-            set
+            get
             {
-                isSelected = value;
-                OnSelectedIndexChanged(EventArgs.Empty);
-                RaisePropertyChanged("IsSelected");
+                return $"Name: {CategoryName}\n" +
+                    $"Description:\n{Description}\n" +
+                    $"Number of products: {Products.Count}";
             }
         }
 
+        //private bool isSelected;
+        //public bool IsSelected
+        //{
+        //    get => isSelected;
+        //    set
+        //    {
+        //        isSelected = value;
+        //        OnSelectedIndexChanged(EventArgs.Empty);
+        //        RaisePropertyChanged("IsSelected");
+        //    }
+        //}
+
         public MainListBoxItem(Category category)
         {
-            IsSelected = false;
             Products = new ObservableCollection<Product>();
             CategoryName = category.Name;
             Description = category.Description;

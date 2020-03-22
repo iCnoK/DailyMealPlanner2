@@ -14,27 +14,16 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-//private string text;
-//public string Text
-//{
-//    get => text;
-//    set
-//    {
-//        text = value;
-//        RaisePropertyChanged("");
-//    }
-//}
-
 namespace PresentationLayer.ViewModel
 {
     public class MainWindowViewModel : BindableBase
     {
-        public event EventHandler<MvvmMessageBoxEventArgs> MessageBoxRequest;
+        public event EventHandler<MessageBoxEventArgs> MessageBoxRequest;
         protected void MessageBox_Show(Action<MessageBoxResult> resultAction, string messageBoxText, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None, MessageBoxResult defaultResult = MessageBoxResult.None, MessageBoxOptions options = MessageBoxOptions.None)
         {
             if (this.MessageBoxRequest != null)
             {
-                this.MessageBoxRequest(this, new MvvmMessageBoxEventArgs(resultAction, messageBoxText, caption, button, icon, defaultResult, options));
+                this.MessageBoxRequest(this, new MessageBoxEventArgs(resultAction, messageBoxText, caption, button, icon, defaultResult, options));
             }
         }
 
@@ -139,30 +128,47 @@ namespace PresentationLayer.ViewModel
         #endregion
         #region Categories
         #region Buttons
-        private ICommand expandOfCollapseAll;
+        //private ICommand expandOfCollapseAll;
+        private ICommand addProduct;
+        private ICommand addCategory;
         private ICommand editCategory;
         private ICommand deleteCategory;
 
         public bool IsExpanded { get; private set; }
-        public ICommand ExpandOrCollapseAll => expandOfCollapseAll ?? (expandOfCollapseAll = new DelegateCommand<object>(delegate (object obj)
+        private bool addCategoryIsPressed = false;
+        private bool addProductIsPressed = false;
+        //public ICommand ExpandOrCollapseAll => expandOfCollapseAll ?? (expandOfCollapseAll = new DelegateCommand<object>(delegate (object obj)
+        //{
+        //    if (IsExpanded)
+        //    {
+        //        IsExpanded = false;
+        //        CollapseAllExpanders();
+        //    }
+        //    else
+        //    {
+        //        IsExpanded = true;
+        //        ExpandAllExpanders();
+        //    }
+        //}));
+        public ICommand AddProduct => addProduct ?? (addProduct = new DelegateCommand<object>(delegate (object obj)
         {
-            if (IsExpanded)
-            {
-                IsExpanded = false;
-                CollapseAllExpanders();
-            }
-            else
-            {
-                IsExpanded = true;
-                ExpandAllExpanders();
-            }
+            addProductIsPressed = true;
+            ProductEditorStatus.ShowProduct(new Product("Name", 100, 1, 1, 1, 1));
+            CategoriesListBoxIsEnabled = false;
+            ProductEditorFocus();
+        }));
+        public ICommand AddCategory => addCategory ?? (addCategory = new DelegateCommand<object>(delegate (object obj)
+        {
+            addCategoryIsPressed = true;
+            CategoryEditorStatus.ShowCategory(new Category("Name", "Description"));
+            CategoriesListBoxIsEnabled = false;
+            CategoryEditorFocus();
         }));
         public ICommand EditCategory => editCategory ?? (editCategory = new DelegateCommand<object>(delegate (object obj)
         {
             CategoryEditorStatus.ShowCategory(MainListBoxItems[SelectedIndex].GetCategory());
             CategoriesListBoxIsEnabled = false;
             CategoryEditorFocus();
-            //ShowCategoryEditor.Execute(null);
         }));
         public ICommand DeleteCategory => deleteCategory ?? (deleteCategory = new DelegateCommand<object>(delegate (object obj)
         {
@@ -204,21 +210,21 @@ namespace PresentationLayer.ViewModel
             set { categoriesListBoxIsEnabled = value; RaisePropertyChanged("CategoriesListBoxIsEnabled"); }
         }
 
-        private void ExpandAllExpanders()
-        {
-            foreach (var item in MainListBoxItems)
-            {
-                item.IsExpanded = true;
-            }
-        }
+        //private void ExpandAllExpanders()
+        //{
+        //    foreach (var item in MainListBoxItems)
+        //    {
+        //        item.IsExpanded = true;
+        //    }
+        //}
 
-        private void CollapseAllExpanders()
-        {
-            foreach (var item in MainListBoxItems)
-            {
-                item.IsExpanded = false;
-            }
-        }
+        //private void CollapseAllExpanders()
+        //{
+        //    foreach (var item in MainListBoxItems)
+        //    {
+        //        item.IsExpanded = false;
+        //    }
+        //}
         #endregion
         #region Editors and meal time
         private readonly SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
@@ -281,13 +287,12 @@ namespace PresentationLayer.ViewModel
             CategoriesListBoxIsEnabled = true;
             ProductEditorStatus = new EditorViewModel();
             CategoryEditorStatus = new CategoryEditorViewModel();
-
-            //ShowMealTimes.Execute(null);
-
+            
             MealTimesFocus();
 
-            Database dataBase = new Database(DataAccessLayer.Enums.DatabaseType.DefaultFile);
             MainListBoxItems = new ObservableCollection<MainListBoxItem>();
+
+            Database dataBase = new Database(DataAccessLayer.Enums.DatabaseType.DefaultFile);
             foreach (var item in dataBase.Categories)
             {
                 MainListBoxItems.Add(new MainListBoxItem(item));
@@ -296,7 +301,6 @@ namespace PresentationLayer.ViewModel
             }
             ProductEditorStatus.EditEnded += ProductEditorStatus_EditEnded;
             CategoryEditorStatus.EditEnded += CategoryEditorStatus_EditEnded;
-
         }
 
         private void ProductEditorStatus_EditEnded(object sender, EventArgs e)
@@ -313,7 +317,15 @@ namespace PresentationLayer.ViewModel
                 carbs: ProductEditorStatus.Carbs,
                 calories: ProductEditorStatus.Calories))
                 {
-                    MainListBoxItems[SelectedIndex][NestedSelectedIndex] = ProductEditorStatus.GetProduct();
+                    if (addProductIsPressed)
+                    {
+                        addProductIsPressed = false;
+                        MainListBoxItems[SelectedIndex].Products.Add(ProductEditorStatus.GetProduct());
+                    }
+                    else
+                    {
+                        MainListBoxItems[SelectedIndex][NestedSelectedIndex] = ProductEditorStatus.GetProduct();
+                    }
                     ProductEditorStatus.Clear();
                     CategoriesListBoxIsEnabled = true;
                     MealTimesFocus();
@@ -342,16 +354,27 @@ namespace PresentationLayer.ViewModel
                 if (Category.IsValid(
                     name: CategoryEditorStatus.Name, description: CategoryEditorStatus.Description))
                 {
-                    int selectedIndexCopy = SelectedIndex;
-                    MainListBoxItems[selectedIndexCopy].SelectedIndexChanged -= MainWindowViewModel_SelectedIndexChanged;
-                    MainListBoxItems[selectedIndexCopy].EditEventRaise -= MainWindowViewModel_EditEventRaise;
-                    MainListBoxItems[selectedIndexCopy] = new MainListBoxItem(CategoryEditorStatus.GetCategory());
-                    MainListBoxItems[selectedIndexCopy].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
-                    MainListBoxItems[selectedIndexCopy].EditEventRaise += MainWindowViewModel_EditEventRaise;
+                    if (addCategoryIsPressed)
+                    {
+                        addCategoryIsPressed = false;
+                        MainListBoxItems.Add(new MainListBoxItem(CategoryEditorStatus.GetCategory()));
+                        MainListBoxItems[MainListBoxItems.Count - 1].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
+                        MainListBoxItems[MainListBoxItems.Count - 1].EditEventRaise += MainWindowViewModel_EditEventRaise;
+                    }
+                    else
+                    {
+                        int selectedIndexCopy = SelectedIndex;
+                        MainListBoxItems[selectedIndexCopy].SelectedIndexChanged -= MainWindowViewModel_SelectedIndexChanged;
+                        MainListBoxItems[selectedIndexCopy].EditEventRaise -= MainWindowViewModel_EditEventRaise;
+                        MainListBoxItems[selectedIndexCopy] = new MainListBoxItem(CategoryEditorStatus.GetCategory());
+                        MainListBoxItems[selectedIndexCopy].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
+                        MainListBoxItems[selectedIndexCopy].EditEventRaise += MainWindowViewModel_EditEventRaise;
+                        SelectedIndex = selectedIndexCopy;
+                    }
                     CategoryEditorStatus.Clear();
                     CategoriesListBoxIsEnabled = true;
                     MealTimesFocus();
-                    SelectedIndex = selectedIndexCopy;
+                    
                 }
                 else
                 {
@@ -371,7 +394,6 @@ namespace PresentationLayer.ViewModel
         {
             CategoriesListBoxIsEnabled = false;
             ProductEditorFocus();
-            //ShowProductEditor.Execute(null);
             Product product = MainListBoxItems[SelectedIndex][NestedSelectedIndex];
             ProductEditorStatus.ShowProduct(product);
         }
@@ -379,31 +401,6 @@ namespace PresentationLayer.ViewModel
         private void MainWindowViewModel_SelectedIndexChanged(object sender, EventArgs e)
         {
             NestedSelectedIndex = MainListBoxItems[SelectedIndex].SelectedIndex;
-            //SenderNameEventArgs<int> eventArgs = (SenderNameEventArgs<int>)e;
-
-            //if (string.Equals(eventArgs.Name, "SelectedIndex"))
-            //{
-            //}
-            //else if (string.Equals(eventArgs.Name, "IsSelected"))
-            //{
-            //    int index = GetNestedSelectedElementIndex();
-            //    if (index != -1)
-            //    {
-            //        MainListBoxItems[SelectedIndex].SelectedIndex = index;
-            //    }
-            //}
         }
-
-        //private int GetNestedSelectedElementIndex()
-        //{
-        //    for (int i = 0; i < MainListBoxItems.Count; i++)
-        //    {
-        //        if (MainListBoxItems[i].IsSelected)
-        //        {
-        //            return i;
-        //        }
-        //    }
-        //    return -1;
-        //}
     }
 }
