@@ -1,9 +1,10 @@
-﻿using BusinessLayer.Extensions;
+﻿using BusinessLayer.Utility;
+using DataAccessLayer.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BusinessLayer.Utility
+namespace DataAccessLayer.Utility
 {
     public static class SearchProduct
     {

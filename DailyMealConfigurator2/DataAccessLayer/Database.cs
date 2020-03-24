@@ -13,9 +13,28 @@ namespace DataAccessLayer.DataAccess
 {
     public class Database
     {
-        public List<Category> Categories { get; private set; }
+        public Category this[int index]
+        {
+            get => Categories[index];
+            set => Categories[index] = value;
+        }
+        public Product this[int category, int product]
+        {
+            get => Categories[category].Products[product];
+            set => Categories[category].Products[product] = value;
+        }
+        private List<Category> categories;
+        public List<Category> Categories
+        {
+            get => new List<Category>(categories.ToArray());
+            private set { categories = value; OnDatabaseChanged(); }
+        }
 
         private readonly string DefaultDatabaseFile = Environment.CurrentDirectory + "\\" + "ddb.xml";
+
+        public EventHandler DatabaseChanged;
+
+        public int Count => Categories.Count;
 
         public string CustomDatabaseFile { get; private set; }
 
@@ -35,6 +54,41 @@ namespace DataAccessLayer.DataAccess
         public Database(DatabaseType type, string customDatabaseFile = null)
         {
             LoadDatabase(type, customDatabaseFile);
+        }
+
+        protected virtual void OnDatabaseChanged()
+        {
+            DatabaseChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void AddCategory(Category category)
+        {
+            Categories.Add(category);
+        }
+
+        public void EditCategory(int index, Category newCategory)
+        {
+            Categories[index] = newCategory;
+        }
+
+        public void DeleteCategory(int index)
+        {
+            Categories.RemoveAt(index);
+        }
+
+        public void AddProductToCategory(int categoryIndex, Product product)
+        {
+            Categories[categoryIndex].Products.Add(product);
+        }
+
+        public void EditProductInCatogory(int categoryIndex, int productIndex, Product newProduct)
+        {
+            Categories[categoryIndex].Products[productIndex] = newProduct;
+        }
+
+        public void DeleteProductFromCategory(int categoryIndex, int productIndex)
+        {
+            Categories[categoryIndex].Products.RemoveAt(productIndex);
         }
 
         private void LoadDatabase(DatabaseType type, string customDatabaseFile = null)

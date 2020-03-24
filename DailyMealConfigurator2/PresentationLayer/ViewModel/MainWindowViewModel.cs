@@ -128,7 +128,7 @@ namespace PresentationLayer.ViewModel
         #endregion
         #region Categories
         #region Buttons
-        //private ICommand expandOfCollapseAll;
+        private ICommand searchTextBoxTextChanged;
         private ICommand addProduct;
         private ICommand addCategory;
         private ICommand editCategory;
@@ -137,19 +137,10 @@ namespace PresentationLayer.ViewModel
         public bool IsExpanded { get; private set; }
         private bool addCategoryIsPressed = false;
         private bool addProductIsPressed = false;
-        //public ICommand ExpandOrCollapseAll => expandOfCollapseAll ?? (expandOfCollapseAll = new DelegateCommand<object>(delegate (object obj)
-        //{
-        //    if (IsExpanded)
-        //    {
-        //        IsExpanded = false;
-        //        CollapseAllExpanders();
-        //    }
-        //    else
-        //    {
-        //        IsExpanded = true;
-        //        ExpandAllExpanders();
-        //    }
-        //}));
+        public ICommand SearchTextBoxTextChanged => searchTextBoxTextChanged ?? (searchTextBoxTextChanged = new DelegateCommand<object>(delegate (object obj)
+        {
+            
+        }));
         public ICommand AddProduct => addProduct ?? (addProduct = new DelegateCommand<object>(delegate (object obj)
         {
             addProductIsPressed = true;
@@ -209,22 +200,6 @@ namespace PresentationLayer.ViewModel
             get => categoriesListBoxIsEnabled;
             set { categoriesListBoxIsEnabled = value; RaisePropertyChanged("CategoriesListBoxIsEnabled"); }
         }
-
-        //private void ExpandAllExpanders()
-        //{
-        //    foreach (var item in MainListBoxItems)
-        //    {
-        //        item.IsExpanded = true;
-        //    }
-        //}
-
-        //private void CollapseAllExpanders()
-        //{
-        //    foreach (var item in MainListBoxItems)
-        //    {
-        //        item.IsExpanded = false;
-        //    }
-        //}
         #endregion
         #region Editors and meal time
         private readonly SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);

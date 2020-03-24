@@ -1,4 +1,4 @@
-﻿namespace BusinessLayer.Extensions
+﻿namespace DataAccessLayer.Extensions
 {
 	public static class LevenshteinDistanceExtension
 	{

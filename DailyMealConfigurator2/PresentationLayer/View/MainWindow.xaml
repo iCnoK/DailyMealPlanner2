@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:local="clr-namespace:PresentationLayer"
         xmlns:view="clr-namespace:PresentationLayer.View"
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
@@ -91,9 +92,13 @@
             <StackPanel Grid.Row="0" Orientation="Horizontal">
                 <Label Width="60" Content="Search" FontSize="15"/>
                 <TextBox Width="200" Margin="2" FontSize="15" VerticalContentAlignment="Center"
-                         Text="{Binding Path=SearchText}"/>
-                <!--<Button Width="100" Content="Expand/collapse" Command="{Binding Path=ExpandOrCollapseAll}" 
-                        Background="Transparent" Margin="34,2,2,2"/>-->
+                         Text="{Binding Path=SearchText}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding Path=SearchTextBoxTextChanged}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
             </StackPanel>
 
             <ListBox Grid.Row="2" Margin="2" ScrollViewer.CanContentScroll="False"
