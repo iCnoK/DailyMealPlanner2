@@ -26,13 +26,13 @@ namespace DataAccessLayer.DataAccess
         private List<Category> categories;
         public List<Category> Categories
         {
-            get => new List<Category>(categories.ToArray());
-            private set { categories = value; OnDatabaseChanged(); }
+            get => categories;
+            set => categories = value;
         }
 
         private readonly string DefaultDatabaseFile = Environment.CurrentDirectory + "\\" + "ddb.xml";
 
-        public EventHandler DatabaseChanged;
+        public event EventHandler DatabaseChanged;
 
         public int Count => Categories.Count;
 
@@ -49,11 +49,13 @@ namespace DataAccessLayer.DataAccess
             {
                 LoadDatabase(DatabaseType.DefaultFile);
             }
+            OnDatabaseChanged();
         }
 
         public Database(DatabaseType type, string customDatabaseFile = null)
         {
             LoadDatabase(type, customDatabaseFile);
+            OnDatabaseChanged();
         }
 
         protected virtual void OnDatabaseChanged()
@@ -64,31 +66,37 @@ namespace DataAccessLayer.DataAccess
         public void AddCategory(Category category)
         {
             Categories.Add(category);
+            OnDatabaseChanged();
         }
 
         public void EditCategory(int index, Category newCategory)
         {
             Categories[index] = newCategory;
+            OnDatabaseChanged();
         }
 
         public void DeleteCategory(int index)
         {
             Categories.RemoveAt(index);
+            OnDatabaseChanged();
         }
 
         public void AddProductToCategory(int categoryIndex, Product product)
         {
             Categories[categoryIndex].Products.Add(product);
+            OnDatabaseChanged();
         }
 
         public void EditProductInCatogory(int categoryIndex, int productIndex, Product newProduct)
         {
             Categories[categoryIndex].Products[productIndex] = newProduct;
+            OnDatabaseChanged();
         }
 
         public void DeleteProductFromCategory(int categoryIndex, int productIndex)
         {
             Categories[categoryIndex].Products.RemoveAt(productIndex);
+            OnDatabaseChanged();
         }
 
         private void LoadDatabase(DatabaseType type, string customDatabaseFile = null)

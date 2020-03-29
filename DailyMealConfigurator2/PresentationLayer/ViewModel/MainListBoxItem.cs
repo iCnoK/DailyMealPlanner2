@@ -25,29 +25,40 @@ namespace PresentationLayer.ViewModel
         {
             SelectedIndexChanged?.Invoke(this, args);
         }
+        public event EventHandler AddEventRaise;
         public event EventHandler EditEventRaise;
+        public event EventHandler RemoveEventRaise;
+        protected virtual void OnAddEventRaise()
+        {
+            AddEventRaise?.Invoke(this, EventArgs.Empty);
+        }
         protected virtual void OnEditEventRaise()
         {
             EditEventRaise?.Invoke(this, EventArgs.Empty);
         }
+        protected virtual void OnRemoveEventRaise()
+        {
+            RemoveEventRaise?.Invoke(this, EventArgs.Empty);
+        }
 
         public ObservableCollection<Product> Products { get; set; }
 
-        //private ICommand addProduct;
+        private ICommand addProductToMealTime;
         private ICommand editProduct;
         private ICommand deleteProduct;
 
-        //public ICommand AddProduct => addProduct ?? (addProduct = new DelegateCommand<object>(delegate (object obj)
-        //{
-            
-        //}));
+        public ICommand AddProductToMealTime => addProductToMealTime ?? (addProductToMealTime = new DelegateCommand<object>(delegate (object obj)
+        {
+            OnAddEventRaise();
+        }));
         public ICommand EditProduct => editProduct ?? (editProduct = new DelegateCommand<object>(delegate (object obj)
         {
             OnEditEventRaise();
         }));
         public ICommand DeleteProduct => deleteProduct ?? (deleteProduct = new DelegateCommand<object>(delegate (object obj)
         {
-            Products.RemoveAt(SelectedIndex);
+            OnRemoveEventRaise();
+            //Products.RemoveAt(SelectedIndex);
         }));
 
         private string categoryName;

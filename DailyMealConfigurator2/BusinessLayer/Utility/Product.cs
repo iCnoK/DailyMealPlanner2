@@ -40,19 +40,122 @@ namespace BusinessLayer.Utility
         {
 
         }
+
+        private string name;
+        private int gramms;
+        private double proteins;
+        private double fats;
+        private double carbs;
+        private double calories;
+
         [XmlElement]
-        public string Name { get; protected set; }
+        public string Name
+        {
+            get => name;
+            set
+            {
+                var rule = new NameRule();
+                if (rule.ApplyRule(value))
+                {
+                    name = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid name");
+                }
+            }
+        }
+
         [XmlElement]
-        public int Gramms { get; protected set; }
+        public int Gramms
+        {
+            get => gramms;
+            set
+            {
+                var rule = new GrammsRule();
+                if (rule.ApplyRule(value))
+                {
+                    gramms = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid gramms count");
+                }
+            }
+        }
+
         [XmlElement]
-        public double Proteins { get; protected set; }
+        public double Proteins
+        {
+            get => proteins;
+            set
+            {
+                var rule = new ProteinsRule();
+                if (rule.ApplyRule(value))
+                {
+                    proteins = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid proteins count");
+                }
+            }
+        }
+
         [XmlElement]
-        public double Fats { get; protected set; }
+        public double Fats
+        {
+            get => fats;
+            set
+            {
+                var rule = new FatsRule();
+                if (rule.ApplyRule(value))
+                {
+                    fats = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid fats count");
+                }
+            }
+        }
+
         [XmlElement]
-        public double Carbs { get; protected set; }
+        public double Carbs
+        {
+            get => carbs;
+            set
+            {
+                var rule = new CarbsRule();
+                if (rule.ApplyRule(value))
+                {
+                    carbs = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid carbs count");
+                }
+            }
+        }
+
         [XmlElement]
-        public double Calories { get; protected set; }
-        //[NonSerialized]
+        public double Calories
+        {
+            get => calories;
+            set
+            {
+                var rule = new CaloriesRule();
+                if (rule.ApplyRule(value))
+                {
+                    calories = value;
+                }
+                else
+                {
+                    throw new Exception("Invalid calories count");
+                }
+            }
+        }
+        
         public string GetToolTipView
         {
             get
@@ -65,6 +168,8 @@ namespace BusinessLayer.Utility
                     $"Calories: {Calories}";
             }
         }
+
+        
 
         public static bool IsValid(Product product)
         {

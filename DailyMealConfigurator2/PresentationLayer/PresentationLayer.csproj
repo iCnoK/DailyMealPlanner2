@@ -149,6 +149,10 @@
       <Project>{B6FD12D8-CBCA-48EC-AEA3-090706631684}</Project>
       <Name>DataAccessLayer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj">
+      <Project>{AB7A1413-829C-447E-905E-D16ED8A672B1}</Project>
+      <Name>ServiceLayer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Collapse.png" />

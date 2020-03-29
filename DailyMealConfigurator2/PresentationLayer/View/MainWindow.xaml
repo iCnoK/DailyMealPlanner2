@@ -15,6 +15,12 @@
         <viewModel:MainWindowViewModel/>
     </Window.DataContext>
 
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding Path=WindowClosed}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="230"/>
@@ -137,6 +143,8 @@
                                  ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex}">
                                 <ListBox.ContextMenu>
                                     <ContextMenu>
+                                        <MenuItem Header="Add to meal time" Command="{Binding Path=AddProductToMealTime}"/>
+                                        <Separator/>
                                         <MenuItem Header="Edit product" Command="{Binding Path=EditProduct}"/>
                                         <Separator/>
                                         <MenuItem Header="Delete product" Command="{Binding Path=DeleteProduct}"/>
@@ -150,7 +158,8 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Path=Name}" Margin="18,0,0,0"
-                                                   ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
+                                                   ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}">
+                                        </TextBlock>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
