@@ -59,7 +59,6 @@ namespace PresentationLayer.ViewModel
         public ICommand DeleteProduct => deleteProduct ?? (deleteProduct = new DelegateCommand<object>(delegate (object obj)
         {
             OnRemoveEventRaise();
-            //Products.RemoveAt(SelectedIndex);
         }));
 
         private string categoryName;
@@ -96,13 +95,6 @@ namespace PresentationLayer.ViewModel
             }
         }
 
-        //private Product selectedProduct;
-        //public Product SelectedProduct
-        //{
-        //    get => selectedProduct;
-        //    set { selectedProduct = value; RaisePropertyChanged("SelectedProduct"); }
-        //}
-
         private bool isExpanded;
         public bool IsExpanded
         {
@@ -120,18 +112,6 @@ namespace PresentationLayer.ViewModel
             }
         }
 
-        //private bool isSelected;
-        //public bool IsSelected
-        //{
-        //    get => isSelected;
-        //    set
-        //    {
-        //        isSelected = value;
-        //        OnSelectedIndexChanged(EventArgs.Empty);
-        //        RaisePropertyChanged("IsSelected");
-        //    }
-        //}
-
         public MainListBoxItem(Category category)
         {
             Products = new ObservableCollection<Product>();
@@ -141,8 +121,6 @@ namespace PresentationLayer.ViewModel
             {
                 Products.Add(item);
             }
-            //SelectedIndex = 0;
-            //SelectedProduct = Products.Count > 0 ? Products[0] : new Product();
         }
 
         public MainListBoxItem(MealTime mealTime)
@@ -154,18 +132,11 @@ namespace PresentationLayer.ViewModel
             {
                 Products.Add(item);
             }
-            //SelectedIndex = 0;
-            //SelectedProduct = Products.Count > 0 ? Products[0] : new Product();
         }
 
         public Category GetCategory()
         {
             return new Category(CategoryName, Description, new List<Product>(Products.ToList<Product>()));
-        }
-
-        public MealTime GetMealTime()
-        {
-            return new MealTime(new List<Product>(Products.ToList<Product>()), CategoryName, Description);
         }
     }
 }

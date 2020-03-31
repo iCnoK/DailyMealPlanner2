@@ -250,5 +250,10 @@ namespace BusinessLayer.Utility
             }
             return false;
         }
+
+        public Product Clone()
+        {
+            return new Product(Name, Gramms, Proteins, Fats, Carbs, Calories);
+        }
     }
 }

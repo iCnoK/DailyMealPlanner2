@@ -6,6 +6,7 @@ using PresentationLayer.Model;
 using PresentationLayer.Utility;
 using Prism.Commands;
 using Prism.Mvvm;
+using ServiceLayer;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -48,37 +49,48 @@ namespace PresentationLayer.ViewModel
 
         #region UserInfo
 
-        private int age;
+        UserDataExchanger UserDataExchanger { get; set; }
+
         public int Age
         {
-            get => age;
+            get => UserDataExchanger.GetAge;
             set
             {
-                age = value;
+                if (UserDataExchanger.GetAge != value)
+                {
+                    UserDataExchanger.ChangeAge(value);
+                }
+
                 RaisePropertyChanged("Age");
             }
         }
 
 
-        private int height;
         public int Height
         {
-            get => height;
+            get => UserDataExchanger.GetHeight;
             set
             {
-                height = value;
+                if (UserDataExchanger.GetHeight != value)
+                {
+                    UserDataExchanger.ChangeHeight(value);
+                }
+
                 RaisePropertyChanged("Height");
             }
         }
 
 
-        private int weight;
         public int Weight
         {
-            get => weight;
+            get => UserDataExchanger.GetWeight;
             set
             {
-                weight = value;
+                if (UserDataExchanger.GetWeight != value)
+                {
+                    UserDataExchanger.ChangeWeight(value);
+                }
+
                 RaisePropertyChanged("Weight");
             }
         }
@@ -102,14 +114,17 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        private DailyActivity dailyActivityComboBosSelectedItem;
-        public DailyActivity DailyActivityComboBosSelectedItem
+        public DailyActivity DailyActivityComboBoxSelectedItem
         {
-            get => dailyActivityComboBosSelectedItem;
+            get => UserDataExchanger.GetDailyActivity;
             set
             {
-                dailyActivityComboBosSelectedItem = value;
-                RaisePropertyChanged("DailyActivityComboBosSelectedItem");
+                if (UserDataExchanger.GetDailyActivity != value)
+                {
+                    UserDataExchanger.ChangeDailyActivity(value);
+                }
+
+                RaisePropertyChanged("DailyActivityComboBoxSelectedItem");
             }
         }
 
@@ -126,37 +141,31 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        private double dailyCaloriesRate;
         public double DailyCaloriesRate
         {
-            get => dailyCaloriesRate;
+            get => Math.Round(UserDataExchanger.GetDailyCaloriesRate, 2);
             set
             {
-                dailyCaloriesRate = value;
                 RaisePropertyChanged("DailyCaloriesRate");
             }
         }
 
 
-        private double aRM;
         public double ARM
         {
-            get => aRM;
+            get => Math.Round(UserDataExchanger.GetARM, 2);
             set
             {
-                aRM = value;
                 RaisePropertyChanged("ARM");
             }
         }
 
 
-        private double bMR;
         public double BMR
         {
-            get => bMR;
+            get => Math.Round(UserDataExchanger.GetBMR, 2);
             set
             {
-                bMR = value;
                 RaisePropertyChanged("BMR");
             }
         }
@@ -197,11 +206,23 @@ namespace PresentationLayer.ViewModel
 
         public ICommand PushProductToMealTime => pushProductToMealTime ?? (pushProductToMealTime = new DelegateCommand<object>(delegate (object obj)
         {
-            if (MainWindowModel.DataExchanger[SelectedIndex].Products[NestedSelectedIndex] != null)
+            if (string.IsNullOrEmpty(SearchText) && SelectedIndex >= 0 && NestedSelectedIndex >= 0 && MainWindowModel.DataExchanger[SelectedIndex].Products[NestedSelectedIndex] != null)
             {
                 if (MealTimeStatus.SelectedIndex >= 0 && MealTimeStatus.SelectedIndex < MealTimeStatus.MainListBoxItems.Count)
                 {
                     MealTimeStatus.AddProductToMealTime(MealTimeStatus.SelectedIndex, MainWindowModel.DataExchanger[SelectedIndex].Products[NestedSelectedIndex]);
+                }
+                else
+                {
+                    MessageBox_Show(null, "You have not selected a meal time!", "Error", MessageBoxButton.OK,
+                        MessageBoxImage.Error, MessageBoxResult.OK);
+                }
+            }
+            else if (!string.IsNullOrEmpty(SearchText))
+            {
+                if (SelectedIndex >= 0 && NestedSelectedIndex >= 0)
+                {
+                    MealTimeStatus.AddProductToMealTime(MealTimeStatus.SelectedIndex, MainWindowModel.ListBoxItems[SelectedIndex].Products[NestedSelectedIndex]);
                 }
                 else
                 {
@@ -314,14 +335,6 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        //private Product nestedSelectedProduct;
-        //public Product NestedSelectedProduct
-        //{
-        //    get => nestedSelectedProduct;
-        //    set { nestedSelectedProduct = value; RaisePropertyChanged("NestedSelectedProduct"); }
-        //}
-
-        
         private string searchText;
         public string SearchText
         {
@@ -329,7 +342,7 @@ namespace PresentationLayer.ViewModel
             set { searchText = value; RaisePropertyChanged("SearchText"); }
         }
 
-        
+
         private bool categoriesListBoxIsEnabled;
         public bool CategoriesListBoxIsEnabled
         {
@@ -402,7 +415,7 @@ namespace PresentationLayer.ViewModel
             CategoryEditorRectangleFill = TransparentBrush;
             MealTimesRectangleFill = FocusBrush;
         }
-        
+
         #endregion
 
         public MainWindowViewModel()
@@ -413,7 +426,11 @@ namespace PresentationLayer.ViewModel
             ProductEditorStatus = new EditorViewModel();
             CategoryEditorStatus = new CategoryEditorViewModel();
             MealTimeStatus = new MealTimeViewModel();
-            
+
+            UserDataExchanger = new UserDataExchanger();
+
+            UserDataExchanger.UserChanged += UserDataExchanger_UserChanged;
+
             MealTimesFocus();
 
             AddSubscriptionToEvents();
@@ -424,6 +441,8 @@ namespace PresentationLayer.ViewModel
             CategoryEditorStatus.EditEnded += CategoryEditorStatus_EditEnded;
             MealTimeStatus.AddEventRaise += MealTimeStatus_AddEventRaise;
             MealTimeStatus.EditEventRaise += MealTimeStatus_EditEventRaise;
+
+            UserDataExchanger_UserChanged(null, EventArgs.Empty);
         }
 
         private void AddSubscriptionToEvents()
@@ -502,25 +521,33 @@ namespace PresentationLayer.ViewModel
                 if (Category.IsValid(
                     name: CategoryEditorStatus.Name, description: CategoryEditorStatus.Description))
                 {
-                    if (addCategoryIsPressed)
+                    if (MealTimeAdd && !MealTimeEdit)
+                    {
+                        MealTimeAdd = false;
+                        MealTimeStatus.AddMealTime(new BusinessLayer.MealPlanner.MealTime(CategoryEditorStatus.GetCategory()));
+                    }
+                    else if (!MealTimeAdd && MealTimeEdit)
+                    {
+                        MealTimeEdit = false;
+                        MealTimeStatus.EditMealTime(MealTimeStatus.SelectedIndex, new BusinessLayer.MealPlanner.MealTime(CategoryEditorStatus.GetCategory()));
+                    }
+                    if (addCategoryIsPressed && !MealTimeAdd && !MealTimeEdit)
                     {
                         addCategoryIsPressed = false;
                         RemoveSubscriptionFromEvents();
                         MainWindowModel.DataExchanger.AddCategory(CategoryEditorStatus.GetCategory());
                         AddSubscriptionToEvents();
                     }
-                    else
+                    else if (!MealTimeAdd && !MealTimeEdit)
                     {
                         RemoveSubscriptionFromEvents();
                         MainWindowModel.DataExchanger.FindAndReplaceCategory(CategoryEditorStatus.CopyOfTheDisplayedCategory, CategoryEditorStatus.GetCategory());
-                        //var index = MainWindowModel.DataExchanger.FindCategory(CategoryEditorStatus.CopyOfTheDisplayedCategory);
-                        //MainWindowModel.DataExchanger.EditCategory(index, CategoryEditorStatus.GetCategory());
                         AddSubscriptionToEvents();
                     }
                     CategoryEditorStatus.Clear();
                     CategoriesListBoxIsEnabled = true;
                     MealTimesFocus();
-                    
+
                 }
                 else
                 {
@@ -538,15 +565,35 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        private void MealTimeStatus_AddEventRaise(object sender, EventArgs e)
+        private void UserDataExchanger_UserChanged(object sender, EventArgs e)
         {
-            AddCategory.Execute(null);
+            Age = UserDataExchanger.GetAge;
+            Height = UserDataExchanger.GetHeight;
+            Weight = UserDataExchanger.GetWeight;
+            DailyActivityComboBoxSelectedItem = UserDataExchanger.GetDailyActivity;
+            ARM = UserDataExchanger.GetARM;
+            BMR = UserDataExchanger.GetBMR;
+            DailyCaloriesRate = UserDataExchanger.GetDailyCaloriesRate;
+            MealTimeStatus.ProgressBarValueMaximum = UserDataExchanger.GetDailyCaloriesRate + 1000;
         }
 
 
+        private bool MealTimeAdd = false;
+
+        private void MealTimeStatus_AddEventRaise(object sender, EventArgs e)
+        {
+            MealTimeAdd = true;
+            CategoryEditorStatus.ShowCategory(new Category("Name", "Description"));
+            CategoriesListBoxIsEnabled = false;
+            CategoryEditorFocus();
+        }
+
+        private bool MealTimeEdit = false;
+
         private void MealTimeStatus_EditEventRaise(object sender, EventArgs e)
         {
-            CategoryEditorStatus.ShowCategory(MainWindowModel.DataExchanger[SelectedIndex]);
+            MealTimeEdit = true;
+            CategoryEditorStatus.ShowCategory(MealTimeStatus.MealTimeModel[MealTimeStatus.SelectedIndex].GetCategory());
             CategoriesListBoxIsEnabled = false;
             CategoryEditorFocus();
         }
@@ -584,8 +631,6 @@ namespace PresentationLayer.ViewModel
         private void MainWindowViewModel_SelectedIndexChanged(object sender, EventArgs e)
         {
             NestedSelectedIndex = MainWindowModel.ListBoxItems[SelectedIndex].SelectedIndex;
-            //NestedSelectedProduct = MainWindowModel.ListBoxItems[SelectedIndex].SelectedProduct;
-            //SearchText = NestedSelectedIndex.ToString();
         }
     }
 }

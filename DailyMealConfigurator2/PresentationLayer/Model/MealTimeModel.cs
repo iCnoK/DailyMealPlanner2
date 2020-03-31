@@ -12,6 +12,13 @@ namespace PresentationLayer.Model
 {
     public class MealTimeModel
     {
+        public MealTime this[int index]
+        {
+            get => MealTimes[index].Clone();
+        }
+
+        public int MealTimesCount => MealTimes.Count;
+
         public ObservableCollection<MainListBoxItem> ListBoxItems { get; set; }
 
         private List<MealTime> MealTimes { get; set; }
@@ -20,25 +27,25 @@ namespace PresentationLayer.Model
 
         public MealTimeModel()
         {
+            MealTimes = new List<MealTime>(0);
             ListBoxItems = new ObservableCollection<MainListBoxItem>();
-            MealTimes = new List<MealTime>();
-            StandardMealTimes = new List<MealTime>();
+            StandardMealTimes = new List<MealTime>(0);
 
             AddDefaultMealTimes();
         }
 
         public void AddMealTime(MealTime mealTime)
         {
-            ListBoxItems.Add(new MainListBoxItem(mealTime));
-            MealTimes.Add(mealTime);
-            StandardMealTimes.Add(mealTime);
+            ListBoxItems.Add(new MainListBoxItem(mealTime.Clone()));
+            MealTimes.Add(mealTime.Clone());
+            StandardMealTimes.Add(mealTime.Clone());
         }
 
         public void EditMealTime(int mealTimeIndex, MealTime newMealTime)
         {
-            ListBoxItems[mealTimeIndex] = new MainListBoxItem(newMealTime);
-            MealTimes[mealTimeIndex] = newMealTime;
-            StandardMealTimes[mealTimeIndex] = newMealTime;
+            ListBoxItems[mealTimeIndex] = new MainListBoxItem(newMealTime.Clone());
+            MealTimes[mealTimeIndex] = newMealTime.Clone();
+            StandardMealTimes[mealTimeIndex] = newMealTime.Clone();
         }
 
         public void DeleteMealTime(int mealTimeIndex)
@@ -50,16 +57,16 @@ namespace PresentationLayer.Model
 
         public void AddProductToMealTime(int mealTimeIndex, Product product)
         {
-            ListBoxItems[mealTimeIndex].Products.Add(product);
-            MealTimes[mealTimeIndex].Products.Add(product);
-            StandardMealTimes[mealTimeIndex].Products.Add(product);
+            ListBoxItems[mealTimeIndex].Products.Add(product.Clone());
+            MealTimes[mealTimeIndex].Add(product);
+            StandardMealTimes[mealTimeIndex].Add(product.Clone());
         }
 
-        public void EditProductInMealTime(int mealTimeIndex, int productIndex, Product newProduct)
+        private void EditProductInMealTime(int mealTimeIndex, int productIndex, Product newProduct)
         {
-            ListBoxItems[mealTimeIndex].Products[productIndex] = newProduct;
-            MealTimes[mealTimeIndex].Products[productIndex] = newProduct;
-            StandardMealTimes[mealTimeIndex].Products[productIndex] = newProduct;
+            //ListBoxItems[mealTimeIndex].Products[productIndex] = newProduct.Clone();
+            MealTimes[mealTimeIndex].Products[productIndex] = newProduct.Clone();
+            StandardMealTimes[mealTimeIndex].Products[productIndex] = newProduct.Clone();
         }
 
         public void DeleteProductFromMealTime(int mealTimeIndex, int productIndex)
@@ -85,9 +92,9 @@ namespace PresentationLayer.Model
 
         private void AddDefaultMealTimes()
         {
-            AddMealTime(new MealTime(new List<Product>(), "Breakfast", "The first meal time"));
-            AddMealTime(new MealTime(new List<Product>(), "Lunch", "The second meal time"));
-            AddMealTime(new MealTime(new List<Product>(), "Dinner", "The third meal time"));
+            AddMealTime(new MealTime("Breakfast", "The first meal time"));
+            AddMealTime(new MealTime("Lunch", "The second meal time"));
+            AddMealTime(new MealTime("Dinner", "The third meal time"));
         }
     }
 }

@@ -16,7 +16,7 @@ namespace PresentationLayer.ViewModel
 {
     public class MealTimeViewModel : BindableBase
     {
-        private MealTimeModel MealTimeModel { get; set; }
+        public MealTimeModel MealTimeModel { get; private set; }
 
         public event EventHandler AddEventRaise;
         public event EventHandler EditEventRaise;
@@ -57,19 +57,53 @@ namespace PresentationLayer.ViewModel
         public int SliderValue
         {
             get => sliderValue;
-            set 
-            { 
+            set
+            {
                 sliderValue = value;
                 if (SelectedIndex >= 0 && NestedSelectedIndex >= 0)
                 {
-                    if (MealTimeModel.ListBoxItems[SelectedIndex].Products.Count != 0)
+                    if (MealTimeModel[SelectedIndex].Products.Count != 0)
                     {
-                        ProductInfo = MealTimeModel.ListBoxItems[SelectedIndex].Products[NestedSelectedIndex].GetToolTipView;
-                        MealTimeModel.ChangeMassOfProduct(SelectedIndex, NestedSelectedIndex, value);
+                        ProductInfo = MealTimeModel[SelectedIndex].Products[NestedSelectedIndex].GetToolTipView;
+                        MealTimeModel.ChangeMassOfProduct(SelectedIndex, NestedSelectedIndex, sliderValue);
+                        ProgressBarValue = CalculateCommonCalories();
                     }
                 }
-                RaisePropertyChanged("SliderValue"); 
+                RaisePropertyChanged("SliderValue");
             }
+        }
+
+
+        private double progressBarValue;
+        public double ProgressBarValue
+        {
+            get => progressBarValue;
+            set
+            {
+                progressBarValue = value;
+                RaisePropertyChanged("ProgressBarValue");
+            }
+        }
+
+
+        private double progressBarValueMaximum;
+        public double ProgressBarValueMaximum
+        {
+            get => progressBarValueMaximum;
+            set
+            {
+                progressBarValueMaximum = value;
+                ProgressBarLabel = Math.Round(value - 1000, 2).ToString();
+                RaisePropertyChanged("ProgressBarValueMaximum");
+            }
+        }
+
+
+        private string progressBarLabel;
+        public string ProgressBarLabel
+        {
+            get => $"Recommended maximum: {progressBarLabel}";
+            set { progressBarLabel = value; RaisePropertyChanged("ProgressBarLabel"); }
         }
 
 
@@ -88,27 +122,48 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        private ICommand addCategory;
-        private ICommand editCategory;
-        private ICommand deleteCategory;
+        private ICommand addMealTimeCommand;
+        private ICommand editMealTimeCommand;
+        private ICommand deleteMealTimeCommand;
+        private ICommand clearAllMealTimesCommand;
+        private ICommand exportAsPDF;
 
 
-        public ICommand AddCategory => addCategory ?? (addCategory = new DelegateCommand<object>(delegate (object obj)
+        public ICommand AddMealTimeCommand => addMealTimeCommand ?? (addMealTimeCommand = new DelegateCommand<object>(delegate (object obj)
         {
             OnAddEventRaise();
         }));
 
 
-        public ICommand EditCategory => editCategory ?? (editCategory = new DelegateCommand<object>(delegate (object obj)
+        public ICommand EditMealTimeCommand => editMealTimeCommand ?? (editMealTimeCommand = new DelegateCommand<object>(delegate (object obj)
         {
             OnEditEventRaise();
         }));
 
 
-        public ICommand DeleteCategory => deleteCategory ?? (deleteCategory = new DelegateCommand<object>(delegate (object obj)
+        public ICommand DeleteMealTimeCommand => deleteMealTimeCommand ?? (deleteMealTimeCommand = new DelegateCommand<object>(delegate (object obj)
         {
             MealTimeModel.DeleteMealTime(SelectedIndex);
         }));
+
+
+        public ICommand ClearAllMealTimesCommand => clearAllMealTimesCommand ?? (clearAllMealTimesCommand = new DelegateCommand<object>(delegate (object obj)
+        {
+            for (int i = 0; i < MealTimeModel.MealTimesCount; i++)
+            {
+                for (int j = 0; j < MealTimeModel[i].Products.Count; j++)
+                {
+                    MealTimeModel.DeleteProductFromMealTime(i, j);
+                }
+            }
+        }));
+
+
+        public ICommand ExportAsPDF => exportAsPDF ?? (exportAsPDF = new DelegateCommand<object>(delegate (object obj)
+        {
+
+        }));
+
 
         public void AddSubscriptionToEvents()
         {
@@ -132,8 +187,23 @@ namespace PresentationLayer.ViewModel
         {
             MealTimeModel = new MealTimeModel();
             SelectedIndex = 0;
-
+            ProgressBarValue = 0;
+            ProgressBarValueMaximum = 1000;
             AddSubscriptionToEvents();
+        }
+
+        private double CalculateCommonCalories()
+        {
+            double counter = 0;
+            for (int i = 0; i < MealTimeModel.MealTimesCount; i++)
+            {
+                var mealTime = MealTimeModel[i];
+                foreach (var product in mealTime.Products)
+                {
+                    counter += product.Calories;
+                }
+            }
+            return counter;
         }
 
         public void AddProductToMealTime(Product product)
@@ -145,30 +215,40 @@ namespace PresentationLayer.ViewModel
         {
             MealTimeModel.AddProductToMealTime(mealTimeIndex, product);
             ProductInfo = product.GetToolTipView;
-            SliderValue = product.Gramms;
+            ProgressBarValue = CalculateCommonCalories();
         }
 
         public void AddMealTime(MealTime mealTime)
         {
             MealTimeModel.AddMealTime(mealTime);
+            AddSubscriptionToEvents();
+            ProgressBarValue = CalculateCommonCalories();
         }
 
         public void EditMealTime(int mealTimeIndex, MealTime newMealTime)
         {
             MealTimeModel.EditMealTime(mealTimeIndex, newMealTime);
+            AddSubscriptionToEvents();
+            ProgressBarValue = CalculateCommonCalories();
         }
 
         private void MealTimeViewModel_RemoveEventRaise(object sender, EventArgs e)
         {
             MealTimeModel.DeleteProductFromMealTime(SelectedIndex, NestedSelectedIndex);
+            ProgressBarValue = CalculateCommonCalories();
         }
 
         private void MealTimeViewModel_SelectedIndexChanged(object sender, EventArgs e)
         {
-            NestedSelectedIndex = MealTimeModel.ListBoxItems[SelectedIndex].SelectedIndex >= 0 ? MealTimeModel.ListBoxItems[SelectedIndex].SelectedIndex : NestedSelectedIndex;
-            ProductInfo = MealTimeModel.ListBoxItems[SelectedIndex].Products[NestedSelectedIndex].GetToolTipView;// + $"\n{NestedSelectedIndex}";
+            NestedSelectedIndex = MealTimeModel.ListBoxItems[SelectedIndex].SelectedIndex >= 0 ?
+                MealTimeModel.ListBoxItems[SelectedIndex].SelectedIndex : NestedSelectedIndex;
 
-            //ProductInfo = NestedSelectedIndex >= 0 ? MealTimeModel.ListBoxItems[SelectedIndex].Products[NestedSelectedIndex].GetToolTipView + $"\n{NestedSelectedIndex}" : string.Empty;
+            if (MealTimeModel.ListBoxItems[SelectedIndex].Products.Count > 0 && NestedSelectedIndex < MealTimeModel.ListBoxItems[SelectedIndex].Products.Count)
+            {
+                ProductInfo = MealTimeModel.ListBoxItems[SelectedIndex].Products[NestedSelectedIndex].GetToolTipView;
+                SliderValue = MealTimeModel[SelectedIndex].Products[NestedSelectedIndex].Gramms;
+                ProgressBarValue = CalculateCommonCalories();
+            }
         }
     }
 }

@@ -137,7 +137,15 @@ namespace ServiceLayer
 
         public List<Category> GetCategories()
         {
-            return new List<Category>(Database.Categories.ToArray());
+            try
+            {
+                return new List<Category>(Database.Categories.ToArray());
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            
         }
 
         public ObservableCollection<Category> GetCategoriesObservableCollection()

@@ -9,7 +9,7 @@
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
         mc:Ignorable="d"
         Title="Daily meal configurator" Height="550" Width="1250"
-        MinHeight="450" MinWidth="1050">
+        MinHeight="450" MinWidth="1250">
 
     <Window.DataContext>
         <viewModel:MainWindowViewModel/>
@@ -70,21 +70,21 @@
                 <Label Content="Age" FontSize="15" Width="60"/>
                 <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Age}"/>
+                         Text="{Binding Path=Age, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="years" FontSize="15" Width="60"/>
             </StackPanel>
             <StackPanel Grid.Row="2" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="Height" FontSize="15" Width="60"/>
                 <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Height}"/>
+                         Text="{Binding Path=Height, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="cm" FontSize="15" Width="60"/>
             </StackPanel>
             <StackPanel Grid.Row="3" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="Weight" FontSize="15" Width="60"/>
                 <TextBox Width="50" FontSize="15" VerticalContentAlignment="Center"
                          PreviewTextInput="TextBox_PreviewTextInput"
-                         Text="{Binding Path=Weight}"/>
+                         Text="{Binding Path=Weight, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="kg" FontSize="15" Width="60"/>
             </StackPanel>
             <StackPanel Grid.Row="4" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
@@ -92,7 +92,7 @@
                 <ComboBox Width="100" FontSize="15" HorizontalContentAlignment="Center"
                           VerticalContentAlignment="Center"
                           ItemsSource="{Binding Path=DailyActivityList}"
-                          SelectedItem="{Binding Path=DailyActivityComboBosSelectedItem}"/>
+                          SelectedItem="{Binding Path=DailyActivityComboBoxSelectedItem}"/>
             </StackPanel>
             <StackPanel Grid.Row="6" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="Daily calories rate" FontSize="15" Width="130"/>

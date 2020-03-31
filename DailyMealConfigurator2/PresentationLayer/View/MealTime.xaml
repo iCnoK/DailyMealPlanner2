@@ -28,7 +28,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path=ProductInfo, UpdateSourceTrigger=PropertyChanged}"
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path=ProductInfo}"
                    ToolTip="{Binding Path=ProductInfo}"/>
 
         <ListBox Grid.Row="0" Grid.Column="1" Margin="2" ScrollViewer.CanContentScroll="False"
@@ -36,9 +36,10 @@
                  IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}">
             <ListBox.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Add meal time" Command="{Binding Path=AddCategory}"/>
+                    <MenuItem Header="Add meal time" Command="{Binding Path=AddMealTimeCommand}"/>
+                    <MenuItem Header="Edit meal time" Command="{Binding Path=EditMealTimeCommand}"/>
                     <Separator/>
-                    <MenuItem Header="Delete meal time" Command="{Binding Path=DeleteCategory}"/>
+                    <MenuItem Header="Delete meal time" Command="{Binding Path=DeleteMealTimeCommand}"/>
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.ItemsPanel>
@@ -92,7 +93,7 @@
                 <ColumnDefinition Width="50"/>
             </Grid.ColumnDefinitions>
             <Slider x:Name="slider" Grid.Column="0" Margin="2" Minimum="1" Maximum="1000" VerticalAlignment="Center"
-                Value="{Binding Path=SliderValue, UpdateSourceTrigger=PropertyChanged}"/>
+                Value="{Binding Path=SliderValue}"/>
             <TextBox Grid.Column="1" Margin="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
                    Text="{Binding ElementName=slider, Path=Value}" FontSize="15"
                    PreviewTextInput="TextBox_PreviewTextInput"/>
@@ -103,18 +104,21 @@
         <Grid Grid.Row="2" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200*"/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="70"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="progressBar" Grid.Column="0" Margin="2" Value="100"/>
+            <ProgressBar x:Name="progressBar" Grid.Column="0" Margin="2" Value="{Binding Path=ProgressBarValue}"
+                         Maximum="{Binding Path=ProgressBarValueMaximum}"/>
             <Label Grid.Column="1" Margin="2,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
                    Content="{Binding ElementName=progressBar, Path=Value}" FontSize="15"/>
+            <Label Grid.Column="0" Margin="2,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
+                   Content="{Binding Path=ProgressBarLabel}" FontSize="15" FontWeight="Bold"/>
         </Grid>
 
 
         <Button Grid.Row="4" Grid.ColumnSpan="2" Width="300" Margin="2" Content="Clear meals" 
-                FontSize="15"/>
-        <Button Grid.Row="5" Grid.ColumnSpan="2" Width="300" Margin="2" Content="Save as pdf" 
-                FontSize="15"/>
+                FontSize="15" Command="{Binding Path=ClearAllMealTimesCommand}"/>
+        <Button Grid.Row="5" Grid.ColumnSpan="2" Width="300" Margin="2" Content="Export as pdf" 
+                FontSize="15" Command="{Binding Path=ExportAsPDF}"/>
 
     </Grid>
 </UserControl>
