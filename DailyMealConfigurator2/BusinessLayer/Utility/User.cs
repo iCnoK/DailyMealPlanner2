@@ -13,10 +13,6 @@ namespace BusinessLayer.Utility
         private int weight;
         private int height;
 
-        //private double aRM;
-        //private double bMR;
-        //private double ailyCaloriesRate;
-
         private DailyActivity dailyActivity;
 
         public User(int age, int weight, int height, DailyActivity dailyActivity)

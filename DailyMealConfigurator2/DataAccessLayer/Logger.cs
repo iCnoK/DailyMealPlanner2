@@ -23,13 +23,11 @@ namespace DataAccessLayer
                 if (!File.Exists(LoggerFile))
                 {
                     StreamWriter = new StreamWriter(LoggerFile, true);
-                    //StreamWriter.AutoFlush = true;
                     LogInformation($"DailyMealPlanner (c)\n" +
                         $"Log created at {DateTime.Now}");
                     return;
                 }
                 StreamWriter = new StreamWriter(LoggerFile, true);
-                //StreamWriter.AutoFlush = true;
             }
             else
             {

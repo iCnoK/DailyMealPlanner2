@@ -30,20 +30,6 @@ namespace PresentationLayer.ViewModel
             }
         }
 
-        //protected void AskTheQuestion()
-        //{
-        //    MessageBox_Show(ProcessTheAnswer, "Are you sure you want to do this?", "Alert", System.Windows.MessageBoxButton.YesNo);
-        //}
-
-        //public void ProcessTheAnswer(MessageBoxResult result)
-        //{
-        //    if (result == MessageBoxResult.Yes)
-        //    {
-        //        // Do something
-        //    }
-        //}
-
-
         private MainWindowModel MainWindowModel { get; set; }
 
 

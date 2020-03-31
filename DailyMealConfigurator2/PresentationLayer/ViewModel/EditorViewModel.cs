@@ -86,25 +86,11 @@ namespace PresentationLayer.ViewModel
         public EditorViewModel()
         {
             Clear();
-            //Name = string.Empty;
-            //Gramms = 0;
-            //Proteins = 0;
-            //Fats = 0;
-            //Carbs = 0;
-            //Calories = 0;
-            //CopyOfTheDisplayedProduct = null;
         }
 
         public EditorViewModel(Product product)
         {
             ShowProduct(product);
-            //Name = product.Name;
-            //Gramms = product.Gramms;
-            //Proteins = product.Proteins;
-            //Fats = product.Fats;
-            //Carbs = product.Carbs;
-            //Calories = product.Calories;
-            //CopyOfTheDisplayedProduct = product;
         }
 
         public void ShowProduct(Product product)

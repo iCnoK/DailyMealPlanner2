@@ -125,14 +125,7 @@ namespace ServiceLayer
         {
             return SearchProduct.FindCategories(Database.Categories, searchName);
         }
-
-
-
-        //public void SetNewCategories(List<Category> categories)
-        //{
-        //    Database.Categories = categories;
-        //}
-
+        
         public List<Category> GetCategories()
         {
             try

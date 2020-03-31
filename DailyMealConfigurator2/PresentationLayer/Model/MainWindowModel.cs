@@ -29,12 +29,6 @@ namespace PresentationLayer.Model
             ListBoxItems = GetMainListBoxItems();
 
             DataExchanger.DatabaseChanged += DataExchanger_DatabaseChanged;
-
-            //ListBoxItems.CollectionChanged += ListBoxItems_CollectionChanged;
-            //foreach (var item in ListBoxItems)
-            //{
-            //    item.Products.CollectionChanged += Products_CollectionChanged;
-            //}
         }
 
         public void SearchProducts(string name)
@@ -85,7 +79,6 @@ namespace PresentationLayer.Model
                 ListBoxItems.Add(new MainListBoxItem(item));
             }
 
-            //ListBoxItems = GetMainListBoxItems();
             OnPropertyChanged();
         }
 
@@ -99,29 +92,5 @@ namespace PresentationLayer.Model
             }
             return result;
         }
-
-        //private void ChangeDatabase()
-        //{
-        //    List<Category> categories = new List<Category>();
-        //    foreach (var item in ListBoxItems)
-        //    {
-        //        categories.Add(item.GetCategory());
-        //    }
-        //    DataExchanger.SetNewCategories(categories);
-        //}
-
-
-
-
-
-        //private void ListBoxItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    //ChangeDatabase();
-        //}
-
-        //private void Products_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    //ChangeDatabase();
-        //}
     }
 }

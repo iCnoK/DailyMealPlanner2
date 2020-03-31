@@ -69,7 +69,6 @@ namespace PresentationLayer.Model
 
         private void EditProductInMealTime(int mealTimeIndex, int productIndex, Product newProduct)
         {
-            //ListBoxItems[mealTimeIndex].Products[productIndex] = newProduct.Clone();
             MealTimes[mealTimeIndex].Products[productIndex] = newProduct.Clone();
             StandardMealTimes[mealTimeIndex].Products[productIndex] = newProduct.Clone();
         }

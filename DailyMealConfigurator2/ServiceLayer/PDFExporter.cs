@@ -15,28 +15,12 @@ namespace ServiceLayer
         {
             using (PdfDocument document = new PdfDocument())
             {
-                //Add a page to the document
                 PdfPage page = document.Pages.Add();
-
-                //Create PDF graphics for a page
                 PdfGraphics graphics = page.Graphics;
-
-                //Set the standard font
                 PdfFont font1 = new PdfStandardFont(PdfFontFamily.Helvetica, 40);
                 PdfFont font2 = new PdfStandardFont(PdfFontFamily.Helvetica, 20);
-                //PdfFont font3 = new PdfStandardFont(PdfFontFamily.Helvetica, 15);
-
                 PdfFont font3 = new PdfTrueTypeFont(new Font("Arial Unicode MS", 15), true);
-
-                //Draw the text
                 graphics.DrawString("Daily Food Ration", font2, PdfBrushes.DarkRed, new PointF(0, 0));
-
-                //PdfBitmap image = new PdfBitmap("../../Images/ImageForPDF.jpg");
-
-                //Draw the image
-
-                //graphics.DrawImage(image, 250, 70);
-
                 PdfPen pdfPen = new PdfPen(Color.DarkBlue, 2);
 
                 graphics.DrawLine(pdfPen, 0, 50, 600, 50);
@@ -70,27 +54,10 @@ namespace ServiceLayer
                     height += 20;
                 }
 
-                //for (int i = 0; i < dailyRation.mealTimes.Count; i++)
-                //{
-                //    height = height + 10;
-
-                //    graphics.DrawString(dailyRation.mealTimes[i].name, font2, PdfBrushes.PaleVioletRed, new PointF(0, height));
-                //    for (int j = 0; j < dailyRation.mealTimes[i].products.Count; j++)
-                //    {
-                //        height = height + 20;
-
-                //        graphics.DrawString(dailyRation.mealTimes[i].products[j].Name + ": " + dailyRation.mealTimes[i].products[j].Gramms + " gramms", font3, PdfBrushes.Black, new PointF(0, height));
-                //        //graphics.DrawString(": " + dailyRation.mealTimes[i].products[j].Gramms + " gramms", font3, PdfBrushes.Black, new PointF(300, height));
-                //    }
-
-                //    height = height + 20;
-                //}
-
                 graphics.DrawLine(pdfPen, 0, height + 20, 600, height + 20);
 
                 graphics.DrawString("Total: " + Math.Round(totalCalories, 3) + " calories", font2, PdfBrushes.PaleVioletRed, new PointF(0, height + 40));
 
-                //Save the document
                 await Task.Run(() => document.Save(file));
                 document.Close(true);
             }
