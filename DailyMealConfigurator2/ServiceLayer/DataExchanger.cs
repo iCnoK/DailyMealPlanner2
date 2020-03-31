@@ -72,15 +72,63 @@ namespace ServiceLayer
             Database.DeleteProductFromCategory(categoryIndex, productIndex);
         }
 
+        public int FindCategory(Category desiredCategory)
+        {
+            return Database.FindCategory(desiredCategory);
+        }
+
+        public int FindProductInCategory(Category desiredCategory, Product desiredProduct)
+        {
+            return Database.FindProductInCategory(desiredCategory, desiredProduct);
+        }
+
+        public int FindProductInCategory(int categoryIndex, Product desiredProduct)
+        {
+            return Database.FindProductInCategory(categoryIndex, desiredProduct);
+        }
+
+        public bool FindAndReplaceCategory(Category desiredCategory, Category newCategory)
+        {
+            var categoryIndex = Database.FindCategory(desiredCategory);
+            if (categoryIndex >= 0)
+            {
+                Database.EditCategory(categoryIndex, newCategory);
+                return true;
+            }
+            return false;
+        }
+
+        public bool FindAndReplaceProductInCategory(Category desiredCategory, Product desiredProduct, Product newProduct)
+        {
+            var categoryIndex = Database.FindCategory(desiredCategory);
+            if (categoryIndex >= 0)
+            {
+                var productIndex = Database.FindProductInCategory(categoryIndex, desiredProduct);
+                if (productIndex >= 0)
+                {
+                    Database.EditProductInCatogory(categoryIndex, productIndex, newProduct);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void SaveData()
         {
             Database.Serialize();
         }
 
-        public List<Category> SearchInCategories(string searchName)
+        public List<Category> SearchProductsInCategories(string searchName)
         {
-            return SearchProduct.FindInCategoriesList(Database.Categories, searchName);
+            return SearchProduct.FindInCategoriesList(Database.Categories, searchName, true);
         }
+
+        public List<Category> SearchCategories(string searchName)
+        {
+            return SearchProduct.FindCategories(Database.Categories, searchName);
+        }
+
+
 
         //public void SetNewCategories(List<Category> categories)
         //{

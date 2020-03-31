@@ -12,6 +12,8 @@ namespace BusinessLayer.Utility
 {
     public class Product
     {
+        private const double Epsilon = 0.0000001;
+
         private Product(string name, int gramms, double protein, double fats, double carbs, double calories, bool flag = false)
         {
             Name = name;
@@ -155,30 +157,30 @@ namespace BusinessLayer.Utility
                 }
             }
         }
-        
+
         public string GetToolTipView
         {
             get
             {
                 return $"Name: {Name}\n" +
                     $"Gramms: {Gramms}\n" +
-                    $"Proteins: {Proteins}\n" +
-                    $"Fats: {Fats}\n" +
-                    $"Carbs: {Carbs}\n" +
-                    $"Calories: {Calories}";
+                    $"Proteins: {Math.Round(Proteins, 2)}\n" +
+                    $"Fats: {Math.Round(Fats, 2)}\n" +
+                    $"Carbs: {Math.Round(Carbs, 2)}\n" +
+                    $"Calories: {Math.Round(Calories, 2)}";
             }
         }
 
-        
+
 
         public static bool IsValid(Product product)
         {
             List<IProductRule> rules = new List<IProductRule>()
             {
-                new NameRule(), 
-                new GrammsRule(), 
-                new ProteinsRule(), 
-                new FatsRule(), 
+                new NameRule(),
+                new GrammsRule(),
+                new ProteinsRule(),
+                new FatsRule(),
                 new CarbsRule(),
                 new CaloriesRule()
             };
@@ -205,6 +207,48 @@ namespace BusinessLayer.Utility
                    && fatsRule.ApplyRule(fats)
                    && carbsRule.ApplyRule(carbs)
                    && caloriesRule.ApplyRule(calories);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Product)
+            {
+                var product = (Product)obj;
+                if (string.Equals(Name, product.Name) &&
+                    Gramms == product.Gramms &&
+                    IsEquals(Proteins, product.Proteins) &&
+                    IsEquals(Fats, product.Fats) &&
+                    IsEquals(Carbs, product.Carbs) &&
+                    IsEquals(Calories, product.Calories))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static Product RecalculateProduct(Product product, int newMass)
+        {
+            int gramms = newMass;
+            double proteins = CalculateProportion(newMass, product.Proteins, product.Gramms);
+            double fats = CalculateProportion(newMass, product.Fats, product.Gramms);
+            double carbs = CalculateProportion(newMass, product.Carbs, product.Gramms);
+            double calories = CalculateProportion(newMass, product.Calories, product.Gramms);
+            return new Product(product.Name, gramms, proteins, fats, carbs, calories);
+        }
+
+        private static double CalculateProportion(int newMas, double value, int oldMas)
+        {
+            return newMas * value / oldMas;
+        }
+
+        private bool IsEquals(double x1, double x2)
+        {
+            if (Math.Abs(x1 - x2) < Epsilon)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -43,7 +43,26 @@ namespace PresentationLayer.Model
             {
                 ListBoxItems.Clear();
 
-                var categories = DataExchanger.GetCategories();
+                var categories = DataExchanger.SearchProductsInCategories(name);
+                foreach (var item in categories)
+                {
+                    ListBoxItems.Add(new MainListBoxItem(item));
+                }
+                OnPropertyChanged();
+            }
+            else
+            {
+                DataExchanger_DatabaseChanged(null, EventArgs.Empty);
+            }
+        }
+
+        public void SearchCategory(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                ListBoxItems.Clear();
+
+                var categories = DataExchanger.SearchCategories(name);
                 foreach (var item in categories)
                 {
                     ListBoxItems.Add(new MainListBoxItem(item));

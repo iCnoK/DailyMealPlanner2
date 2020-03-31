@@ -99,6 +99,30 @@ namespace DataAccessLayer.DataAccess
             OnDatabaseChanged();
         }
 
+        public int FindCategory(Category desiredCategory)
+        {
+            return Categories.FindIndex(x => x.Equals(desiredCategory));
+        }
+
+        public int FindProductInCategory(Category desiredCategory, Product desiredProduct)
+        {
+            var categoryIndex = FindCategory(desiredCategory);
+            if (categoryIndex >= 0)
+            {
+                return Categories[categoryIndex].Products.FindIndex(x => x.Equals(desiredProduct));
+            }
+            return categoryIndex;
+        }
+
+        public int FindProductInCategory(int categoryIndex, Product desiredProduct)
+        {
+            if (categoryIndex >= 0)
+            {
+                return Categories[categoryIndex].Products.FindIndex(x => x.Equals(desiredProduct));
+            }
+            return categoryIndex;
+        }
+
         private void LoadDatabase(DatabaseType type, string customDatabaseFile = null)
         {
             Logger Logger = new Logger(Environment.CurrentDirectory + "\\" + "DatabaseLog.txt");

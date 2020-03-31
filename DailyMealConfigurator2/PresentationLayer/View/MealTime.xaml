@@ -15,15 +15,106 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="300"/>
             <RowDefinition/>
+            <RowDefinition Height="30"/>
             <RowDefinition/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="150*" MaxWidth="250"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path=ProductInfo, UpdateSourceTrigger=PropertyChanged}"
+                   ToolTip="{Binding Path=ProductInfo}"/>
+
+        <ListBox Grid.Row="0" Grid.Column="1" Margin="2" ScrollViewer.CanContentScroll="False"
+                 ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex, UpdateSourceTrigger=PropertyChanged}"
+                 IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add meal time" Command="{Binding Path=AddCategory}"/>
+                    <Separator/>
+                    <MenuItem Header="Delete meal time" Command="{Binding Path=DeleteCategory}"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Expander ExpandDirection="Down"
+                                IsExpanded="{Binding Mode=TwoWay, Path=IsSelected, 
+                                RelativeSource={RelativeSource AncestorType=ListBoxItem, Mode=FindAncestor}}">
+                        <Expander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Width="30" Content="{Binding Path=Products.Count, Mode=OneWay}"
+                                           ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
+                                <Label Content="{Binding Path=CategoryName}" 
+                                           ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}"/>
+                            </StackPanel>
+                        </Expander.Header>
+                        <ListBox Background="Transparent" 
+                                 BorderThickness="0" ScrollViewer.CanContentScroll="False"
+                                 ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex, UpdateSourceTrigger=PropertyChanged}"
+                                 SelectedItem="{Binding Path=SelectedProduct}">
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Delete product" Command="{Binding Path=DeleteProduct}"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Name}" Margin="18,0,0,0"
+                                                   ToolTip="{Binding Path=GetToolTipView, Mode=OneWay}">
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Expander>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200*"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+            <Slider x:Name="slider" Grid.Column="0" Margin="2" Minimum="1" Maximum="1000" VerticalAlignment="Center"
+                Value="{Binding Path=SliderValue, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Column="1" Margin="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
+                   Text="{Binding ElementName=slider, Path=Value}" FontSize="15"
+                   PreviewTextInput="TextBox_PreviewTextInput"/>
+        </Grid>
         
         
-        
+
+        <Grid Grid.Row="2" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200*"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="progressBar" Grid.Column="0" Margin="2" Value="100"/>
+            <Label Grid.Column="1" Margin="2,0,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
+                   Content="{Binding ElementName=progressBar, Path=Value}" FontSize="15"/>
+        </Grid>
+
+
+        <Button Grid.Row="4" Grid.ColumnSpan="2" Width="300" Margin="2" Content="Clear meals" 
+                FontSize="15"/>
+        <Button Grid.Row="5" Grid.ColumnSpan="2" Width="300" Margin="2" Content="Save as pdf" 
+                FontSize="15"/>
+
     </Grid>
 </UserControl>

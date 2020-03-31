@@ -8,7 +8,7 @@
         xmlns:view="clr-namespace:PresentationLayer.View"
         xmlns:viewModel="clr-namespace:PresentationLayer.ViewModel"
         mc:Ignorable="d"
-        Title="Daily meal configurator" Height="550" Width="1050"
+        Title="Daily meal configurator" Height="550" Width="1250"
         MinHeight="450" MinWidth="1050">
 
     <Window.DataContext>
@@ -21,11 +21,33 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
+    <Window.Resources>
+        <Style x:Key="PushButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightGray"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="230"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="40"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="200*"/>
         </Grid.ColumnDefinitions>
@@ -70,7 +92,7 @@
                 <ComboBox Width="100" FontSize="15" HorizontalContentAlignment="Center"
                           VerticalContentAlignment="Center"
                           ItemsSource="{Binding Path=DailyActivityList}"
-                          SelectedIndex="{Binding Path=ComboBoxSelectedIndex}"/>
+                          SelectedItem="{Binding Path=DailyActivityComboBosSelectedItem}"/>
             </StackPanel>
             <StackPanel Grid.Row="6" Margin="1" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="Daily calories rate" FontSize="15" Width="130"/>
@@ -98,18 +120,22 @@
             <StackPanel Grid.Row="0" Orientation="Horizontal">
                 <Label Width="60" Content="Search" FontSize="15"/>
                 <TextBox Width="200" Margin="2" FontSize="15" VerticalContentAlignment="Center"
-                         Text="{Binding Path=SearchText}">
+                         Text="{Binding Path=SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="TextChanged">
                             <i:InvokeCommandAction Command="{Binding Path=SearchTextBoxTextChanged}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </TextBox>
+                <ComboBox Width="132" FontSize="15" HorizontalContentAlignment="Center"
+                          VerticalContentAlignment="Center" Margin="2"
+                          ItemsSource="{Binding Path=SearchRootTypeList}"
+                          SelectedItem="{Binding Path=SearchRootTypeComboBoxSelectedItem}"/>
             </StackPanel>
 
             <ListBox Grid.Row="2" Margin="2" ScrollViewer.CanContentScroll="False"
-                     ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex}"
-                     IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}">
+                     ItemsSource="{Binding Path=MainListBoxItems}" SelectedIndex="{Binding Path=SelectedIndex, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding Path=CategoriesListBoxIsEnabled}" SelectedItem="{Binding Path=SelectedCategory}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Add product" Command="{Binding Path=AddProduct}"/>
@@ -140,7 +166,7 @@
                             </Expander.Header>
                             <ListBox Background="Transparent" 
                                  BorderThickness="0" ScrollViewer.CanContentScroll="False"
-                                 ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex}">
+                                 ItemsSource="{Binding Path=Products}" SelectedIndex="{Binding Path=SelectedIndex, UpdateSourceTrigger=PropertyChanged}">
                                 <ListBox.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add to meal time" Command="{Binding Path=AddProductToMealTime}"/>
@@ -172,7 +198,12 @@
 
         <Rectangle Grid.Column="3" Fill="Gray"/>
 
-        <Grid Grid.Column="4">
+        <Button Grid.Column="4" Content="->" FontSize="28" FontWeight="Bold" Margin="2"
+                Command="{Binding Path=PushProductToMealTime}" Style="{StaticResource PushButton}"/>
+
+        <Rectangle Grid.Column="5" Fill="Gray"/>
+
+        <Grid Grid.Column="6">
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
                 <RowDefinition/>
@@ -202,6 +233,8 @@
                          DataContext="{Binding Path=ProductEditorStatus}"/>
             <view:CategoryEditor Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                                  DataContext="{Binding Path=CategoryEditorStatus}"/>
+            <view:MealTime Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                           DataContext="{Binding Path=MealTimeStatus}"/>
         </Grid>
 
     </Grid>

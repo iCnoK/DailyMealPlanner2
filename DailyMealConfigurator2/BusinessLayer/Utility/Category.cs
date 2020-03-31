@@ -91,5 +91,21 @@ namespace BusinessLayer.Utility
 
             return nameRule.ApplyRule(name) && descriptionRule.ApplyRule(description);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Category)
+            {
+                var category = (Category)obj;
+                               
+                if (string.Equals(this.Name, category.Name) &&
+                    string.Equals(this.Description, category.Description) &&
+                    this.Products.Count == category.Products.Count)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

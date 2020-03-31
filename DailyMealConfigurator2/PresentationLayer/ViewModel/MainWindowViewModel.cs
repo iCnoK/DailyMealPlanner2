@@ -1,6 +1,7 @@
 ﻿using BusinessLayer.Enums;
 using BusinessLayer.Utility;
 using DataAccessLayer.DataAccess;
+using DataAccessLayer.Enums;
 using PresentationLayer.Model;
 using PresentationLayer.Utility;
 using Prism.Commands;
@@ -46,7 +47,7 @@ namespace PresentationLayer.ViewModel
 
 
         #region UserInfo
-        
+
         private int age;
         public int Age
         {
@@ -82,7 +83,7 @@ namespace PresentationLayer.ViewModel
             }
         }
 
-        
+
         public IEnumerable<DailyActivity> DailyActivityList
         {
             get
@@ -92,18 +93,39 @@ namespace PresentationLayer.ViewModel
         }
 
 
-        private int comboBoxSelectedIndex;
-        public int ComboBoxSelectedIndex
+        public IEnumerable<SearchRootType> SearchRootTypeList
         {
-            get => comboBoxSelectedIndex;
-            set
+            get
             {
-                comboBoxSelectedIndex = value;
-                RaisePropertyChanged("ComboBoxSelectedIndex");
+                return Enum.GetValues(typeof(SearchRootType)).Cast<SearchRootType>();
             }
         }
-        
-        
+
+
+        private DailyActivity dailyActivityComboBosSelectedItem;
+        public DailyActivity DailyActivityComboBosSelectedItem
+        {
+            get => dailyActivityComboBosSelectedItem;
+            set
+            {
+                dailyActivityComboBosSelectedItem = value;
+                RaisePropertyChanged("DailyActivityComboBosSelectedItem");
+            }
+        }
+
+
+        private SearchRootType searchRootTypeComboBosSelectedItem;
+        public SearchRootType SearchRootTypeComboBoxSelectedItem
+        {
+            get => searchRootTypeComboBosSelectedItem;
+            set
+            {
+                searchRootTypeComboBosSelectedItem = value;
+                RaisePropertyChanged("SearchRootTypeComboBoxSelectedItem");
+            }
+        }
+
+
         private double dailyCaloriesRate;
         public double DailyCaloriesRate
         {
@@ -138,11 +160,11 @@ namespace PresentationLayer.ViewModel
                 RaisePropertyChanged("BMR");
             }
         }
-        
+
         #endregion
 
         #region Categories
-        
+
         private ICommand searchTextBoxTextChanged;
         private ICommand pushProductToMealTime;
         private ICommand addProduct;
@@ -156,19 +178,42 @@ namespace PresentationLayer.ViewModel
 
         private bool addCategoryIsPressed = false;
 
-        
+
         private bool addProductIsPressed = false;
 
 
         public ICommand SearchTextBoxTextChanged => searchTextBoxTextChanged ?? (searchTextBoxTextChanged = new DelegateCommand<object>(delegate (object obj)
         {
-
+            if (SearchRootTypeComboBoxSelectedItem == SearchRootType.CategoryType)
+            {
+                MainWindowModel.SearchCategory(SearchText);
+            }
+            else if (SearchRootTypeComboBoxSelectedItem == SearchRootType.ProductType)
+            {
+                MainWindowModel.SearchProducts(SearchText);
+            }
         }));
 
 
         public ICommand PushProductToMealTime => pushProductToMealTime ?? (pushProductToMealTime = new DelegateCommand<object>(delegate (object obj)
         {
-
+            if (MainWindowModel.DataExchanger[SelectedIndex].Products[NestedSelectedIndex] != null)
+            {
+                if (MealTimeStatus.SelectedIndex >= 0 && MealTimeStatus.SelectedIndex < MealTimeStatus.MainListBoxItems.Count)
+                {
+                    MealTimeStatus.AddProductToMealTime(MealTimeStatus.SelectedIndex, MainWindowModel.DataExchanger[SelectedIndex].Products[NestedSelectedIndex]);
+                }
+                else
+                {
+                    MessageBox_Show(null, "You have not selected a meal time!", "Error", MessageBoxButton.OK,
+                        MessageBoxImage.Error, MessageBoxResult.OK);
+                }
+            }
+            else
+            {
+                MessageBox_Show(null, "You have not selected a product!", "Error", MessageBoxButton.OK,
+                        MessageBoxImage.Error, MessageBoxResult.OK);
+            }
         }));
 
 
@@ -192,8 +237,14 @@ namespace PresentationLayer.ViewModel
 
         public ICommand EditCategory => editCategory ?? (editCategory = new DelegateCommand<object>(delegate (object obj)
         {
-            //CategoryEditorStatus.ShowCategory(MainListBoxItems[SelectedIndex].GetCategory());
-            CategoryEditorStatus.ShowCategory(MainWindowModel.DataExchanger[SelectedIndex]);
+            if (string.IsNullOrEmpty(SearchText))
+            {
+                CategoryEditorStatus.ShowCategory(MainWindowModel.DataExchanger[SelectedIndex]);
+            }
+            else
+            {
+                CategoryEditorStatus.ShowCategory(SelectedCategory.GetCategory());
+            }
             CategoriesListBoxIsEnabled = false;
             CategoryEditorFocus();
         }));
@@ -201,8 +252,19 @@ namespace PresentationLayer.ViewModel
 
         public ICommand DeleteCategory => deleteCategory ?? (deleteCategory = new DelegateCommand<object>(delegate (object obj)
         {
-            //MainListBoxItems.RemoveAt(SelectedIndex);
-            MainWindowModel.DataExchanger.DeleteCategory(SelectedIndex);
+            if (string.IsNullOrEmpty(SearchText))
+            {
+                MainWindowModel.DataExchanger.DeleteCategory(SelectedIndex);
+            }
+            else
+            {
+                var categoryIndex = MainWindowModel.DataExchanger.FindCategory(SelectedCategory.GetCategory());
+                if (categoryIndex >= 0)
+                {
+                    MainWindowModel.DataExchanger.DeleteCategory(categoryIndex);
+                }
+            }
+            SearchText = string.Empty;
         }));
 
 
@@ -216,6 +278,9 @@ namespace PresentationLayer.ViewModel
 
 
         public CategoryEditorViewModel CategoryEditorStatus { get; set; }
+
+
+        public MealTimeViewModel MealTimeStatus { get; set; }
 
 
         public ObservableCollection<MainListBoxItem> MainListBoxItems
@@ -232,13 +297,29 @@ namespace PresentationLayer.ViewModel
             set { selectedIndex = value; RaisePropertyChanged("SelectedIndex"); }
         }
 
-        
+
+        private MainListBoxItem selectedCategory;
+        public MainListBoxItem SelectedCategory
+        {
+            get => selectedCategory;
+            set { selectedCategory = value; RaisePropertyChanged("SelectedCategory"); }
+        }
+
+
         private int nestedSelectedIndex;
         public int NestedSelectedIndex
         {
             get => nestedSelectedIndex;
             set { nestedSelectedIndex = value; RaisePropertyChanged("NestedSelectedIndex"); }
         }
+
+
+        //private Product nestedSelectedProduct;
+        //public Product NestedSelectedProduct
+        //{
+        //    get => nestedSelectedProduct;
+        //    set { nestedSelectedProduct = value; RaisePropertyChanged("NestedSelectedProduct"); }
+        //}
 
         
         private string searchText;
@@ -292,9 +373,9 @@ namespace PresentationLayer.ViewModel
 
         private void ProductEditorFocus()
         {
-            ProductEditorStatus.Visibility = System.Windows.Visibility.Visible;
-            CategoryEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
-            //
+            ProductEditorStatus.Visibility = Visibility.Visible;
+            CategoryEditorStatus.Visibility = Visibility.Collapsed;
+            MealTimeStatus.Visibility = Visibility.Collapsed;
             ProductEditorRectangleFill = FocusBrush;
             CategoryEditorRectangleFill = TransparentBrush;
             MealTimesRectangleFill = TransparentBrush;
@@ -303,9 +384,9 @@ namespace PresentationLayer.ViewModel
 
         private void CategoryEditorFocus()
         {
-            ProductEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
-            CategoryEditorStatus.Visibility = System.Windows.Visibility.Visible;
-            //
+            ProductEditorStatus.Visibility = Visibility.Collapsed;
+            CategoryEditorStatus.Visibility = Visibility.Visible;
+            MealTimeStatus.Visibility = Visibility.Collapsed;
             ProductEditorRectangleFill = TransparentBrush;
             CategoryEditorRectangleFill = FocusBrush;
             MealTimesRectangleFill = TransparentBrush;
@@ -314,9 +395,9 @@ namespace PresentationLayer.ViewModel
 
         private void MealTimesFocus()
         {
-            ProductEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
-            CategoryEditorStatus.Visibility = System.Windows.Visibility.Collapsed;
-            //
+            ProductEditorStatus.Visibility = Visibility.Collapsed;
+            CategoryEditorStatus.Visibility = Visibility.Collapsed;
+            MealTimeStatus.Visibility = Visibility.Visible;
             ProductEditorRectangleFill = TransparentBrush;
             CategoryEditorRectangleFill = TransparentBrush;
             MealTimesRectangleFill = FocusBrush;
@@ -331,6 +412,7 @@ namespace PresentationLayer.ViewModel
             CategoriesListBoxIsEnabled = true;
             ProductEditorStatus = new EditorViewModel();
             CategoryEditorStatus = new CategoryEditorViewModel();
+            MealTimeStatus = new MealTimeViewModel();
             
             MealTimesFocus();
 
@@ -340,6 +422,8 @@ namespace PresentationLayer.ViewModel
 
             ProductEditorStatus.EditEnded += ProductEditorStatus_EditEnded;
             CategoryEditorStatus.EditEnded += CategoryEditorStatus_EditEnded;
+            MealTimeStatus.AddEventRaise += MealTimeStatus_AddEventRaise;
+            MealTimeStatus.EditEventRaise += MealTimeStatus_EditEventRaise;
         }
 
         private void AddSubscriptionToEvents()
@@ -381,16 +465,12 @@ namespace PresentationLayer.ViewModel
                     if (addProductIsPressed)
                     {
                         addProductIsPressed = false;
-
-                        //MainWindowModel.DataExchanger[SelectedIndex].Products.Add(ProductEditorStatus.GetProduct());
                         MainWindowModel.DataExchanger.AddProductToCategory(SelectedIndex, ProductEditorStatus.GetProduct());
-
-                        //MainListBoxItems[SelectedIndex].Products.Add(ProductEditorStatus.GetProduct());
                     }
                     else
                     {
-                        MainWindowModel.DataExchanger.EditProductInCatogory(SelectedIndex, NestedSelectedIndex, ProductEditorStatus.GetProduct());
-                        //MainListBoxItems[SelectedIndex][NestedSelectedIndex] = ProductEditorStatus.GetProduct();
+                        MainWindowModel.DataExchanger.FindAndReplaceProductInCategory(
+                            SelectedCategory.GetCategory(), ProductEditorStatus.CopyOfTheDisplayedProduct, ProductEditorStatus.GetProduct());
                     }
                     ProductEditorStatus.Clear();
                     CategoriesListBoxIsEnabled = true;
@@ -409,6 +489,7 @@ namespace PresentationLayer.ViewModel
                 CategoriesListBoxIsEnabled = true;
                 MealTimesFocus();
             }
+            SearchText = string.Empty;
         }
 
 
@@ -427,21 +508,13 @@ namespace PresentationLayer.ViewModel
                         RemoveSubscriptionFromEvents();
                         MainWindowModel.DataExchanger.AddCategory(CategoryEditorStatus.GetCategory());
                         AddSubscriptionToEvents();
-                        //MainListBoxItems.Add(new MainListBoxItem(CategoryEditorStatus.GetCategory()));
-                        //MainListBoxItems[MainListBoxItems.Count - 1].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
-                        //MainListBoxItems[MainListBoxItems.Count - 1].EditEventRaise += MainWindowViewModel_EditEventRaise;
                     }
                     else
                     {
-                        //int selectedIndexCopy = SelectedIndex;
-                        //MainListBoxItems[selectedIndexCopy].SelectedIndexChanged -= MainWindowViewModel_SelectedIndexChanged;
-                        //MainListBoxItems[selectedIndexCopy].EditEventRaise -= MainWindowViewModel_EditEventRaise;
-                        //MainListBoxItems[selectedIndexCopy] = new MainListBoxItem(CategoryEditorStatus.GetCategory());
-                        //MainListBoxItems[selectedIndexCopy].SelectedIndexChanged += MainWindowViewModel_SelectedIndexChanged;
-                        //MainListBoxItems[selectedIndexCopy].EditEventRaise += MainWindowViewModel_EditEventRaise;
-                        //SelectedIndex = selectedIndexCopy;
                         RemoveSubscriptionFromEvents();
-                        MainWindowModel.DataExchanger.EditCategory(SelectedIndex, CategoryEditorStatus.GetCategory());
+                        MainWindowModel.DataExchanger.FindAndReplaceCategory(CategoryEditorStatus.CopyOfTheDisplayedCategory, CategoryEditorStatus.GetCategory());
+                        //var index = MainWindowModel.DataExchanger.FindCategory(CategoryEditorStatus.CopyOfTheDisplayedCategory);
+                        //MainWindowModel.DataExchanger.EditCategory(index, CategoryEditorStatus.GetCategory());
                         AddSubscriptionToEvents();
                     }
                     CategoryEditorStatus.Clear();
@@ -461,6 +534,21 @@ namespace PresentationLayer.ViewModel
                 CategoriesListBoxIsEnabled = true;
                 MealTimesFocus();
             }
+            SearchText = string.Empty;
+        }
+
+
+        private void MealTimeStatus_AddEventRaise(object sender, EventArgs e)
+        {
+            AddCategory.Execute(null);
+        }
+
+
+        private void MealTimeStatus_EditEventRaise(object sender, EventArgs e)
+        {
+            CategoryEditorStatus.ShowCategory(MainWindowModel.DataExchanger[SelectedIndex]);
+            CategoriesListBoxIsEnabled = false;
+            CategoryEditorFocus();
         }
 
 
@@ -480,7 +568,6 @@ namespace PresentationLayer.ViewModel
         {
             CategoriesListBoxIsEnabled = false;
             ProductEditorFocus();
-            //Product product = MainListBoxItems[SelectedIndex][NestedSelectedIndex];
             Product product = MainWindowModel.DataExchanger[SelectedIndex, NestedSelectedIndex];
             ProductEditorStatus.ShowProduct(product);
         }
@@ -489,13 +576,16 @@ namespace PresentationLayer.ViewModel
         private void MainWindowViewModel_RemoveEventRaise(object sender, EventArgs e)
         {
             MainWindowModel.DataExchanger.DeleteProductFromCategory(SelectedIndex, NestedSelectedIndex);
+
+            SearchText = string.Empty;
         }
 
 
         private void MainWindowViewModel_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //NestedSelectedIndex = MainListBoxItems[SelectedIndex].SelectedIndex;
             NestedSelectedIndex = MainWindowModel.ListBoxItems[SelectedIndex].SelectedIndex;
+            //NestedSelectedProduct = MainWindowModel.ListBoxItems[SelectedIndex].SelectedProduct;
+            //SearchText = NestedSelectedIndex.ToString();
         }
     }
 }
