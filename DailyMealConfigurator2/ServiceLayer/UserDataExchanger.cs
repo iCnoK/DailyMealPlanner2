@@ -19,6 +19,8 @@ namespace ServiceLayer
             UserChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        public User GetUser() => new User(User.Age, User.Weight, User.Height, User.DailyActivity);
+
         public UserDataExchanger()
         {
             User = new User(0, 0, 0, DailyActivity.Low);

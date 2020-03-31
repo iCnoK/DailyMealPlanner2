@@ -17,6 +17,11 @@ namespace PresentationLayer.Model
             get => MealTimes[index].Clone();
         }
 
+        public List<MealTime> GetMealTimes()
+        {
+            return new List<MealTime>(MealTimes.ToArray());
+        }
+
         public int MealTimesCount => MealTimes.Count;
 
         public ObservableCollection<MainListBoxItem> ListBoxItems { get; set; }

@@ -1,12 +1,10 @@
-﻿using BusinessLayer.Utility;
+﻿using BusinessLayer.MealPlanner;
+using BusinessLayer.Utility;
 using DataAccessLayer.DataAccess;
 using DataAccessLayer.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServiceLayer
 {
@@ -145,16 +143,19 @@ namespace ServiceLayer
             {
                 return null;
             }
-            
+
         }
 
         public ObservableCollection<Category> GetCategoriesObservableCollection()
         {
             return new ObservableCollection<Category>(Database.Categories.ToArray());
         }
-        #endregion
-        #region MyRegion
 
+
+        public void ExportAsPDF(string file, User user, List<MealTime> mealTimes, double totalCalories)
+        {
+            PDFExporter.ExportToPDFAsync(file, user, mealTimes, totalCalories);
+        }
         #endregion
     }
 }

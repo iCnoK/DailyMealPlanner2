@@ -1,8 +1,10 @@
 ﻿using BusinessLayer.MealPlanner;
 using BusinessLayer.Utility;
+using DataAccessLayer;
 using PresentationLayer.Model;
 using Prism.Commands;
 using Prism.Mvvm;
+using ServiceLayer;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,9 +19,11 @@ namespace PresentationLayer.ViewModel
     public class MealTimeViewModel : BindableBase
     {
         public MealTimeModel MealTimeModel { get; private set; }
+        
 
         public event EventHandler AddEventRaise;
         public event EventHandler EditEventRaise;
+        public event EventHandler SaveAsPDFRaise;
         protected virtual void OnAddEventRaise()
         {
             AddEventRaise?.Invoke(this, EventArgs.Empty);
@@ -27,6 +31,10 @@ namespace PresentationLayer.ViewModel
         protected virtual void OnEditEventRaise()
         {
             EditEventRaise?.Invoke(this, EventArgs.Empty);
+        }
+        protected virtual void OnSaveAsPDFRaise()
+        {
+            SaveAsPDFRaise?.Invoke(this, EventArgs.Empty);
         }
 
         private Visibility visibility;
@@ -151,17 +159,19 @@ namespace PresentationLayer.ViewModel
         {
             for (int i = 0; i < MealTimeModel.MealTimesCount; i++)
             {
-                for (int j = 0; j < MealTimeModel[i].Products.Count; j++)
+                int productNumber = MealTimeModel[i].Products.Count;
+                for (int j = 0; j < productNumber; j++)
                 {
-                    MealTimeModel.DeleteProductFromMealTime(i, j);
+                    MealTimeModel.DeleteProductFromMealTime(i, 0);
                 }
             }
+            ProgressBarValue = 0;
         }));
 
 
         public ICommand ExportAsPDF => exportAsPDF ?? (exportAsPDF = new DelegateCommand<object>(delegate (object obj)
         {
-
+            OnSaveAsPDFRaise();
         }));
 
 
@@ -192,7 +202,7 @@ namespace PresentationLayer.ViewModel
             AddSubscriptionToEvents();
         }
 
-        private double CalculateCommonCalories()
+        public double CalculateCommonCalories()
         {
             double counter = 0;
             for (int i = 0; i < MealTimeModel.MealTimesCount; i++)

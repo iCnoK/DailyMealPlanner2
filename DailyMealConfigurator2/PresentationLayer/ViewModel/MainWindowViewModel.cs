@@ -441,9 +441,11 @@ namespace PresentationLayer.ViewModel
             CategoryEditorStatus.EditEnded += CategoryEditorStatus_EditEnded;
             MealTimeStatus.AddEventRaise += MealTimeStatus_AddEventRaise;
             MealTimeStatus.EditEventRaise += MealTimeStatus_EditEventRaise;
+            MealTimeStatus.SaveAsPDFRaise += MealTimeStatus_SaveAsPDFRaise;
 
             UserDataExchanger_UserChanged(null, EventArgs.Empty);
         }
+
 
         private void AddSubscriptionToEvents()
         {
@@ -596,6 +598,14 @@ namespace PresentationLayer.ViewModel
             CategoryEditorStatus.ShowCategory(MealTimeStatus.MealTimeModel[MealTimeStatus.SelectedIndex].GetCategory());
             CategoriesListBoxIsEnabled = false;
             CategoryEditorFocus();
+        }
+
+
+        private void MealTimeStatus_SaveAsPDFRaise(object sender, EventArgs e)
+        {
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            MainWindowModel.DataExchanger.ExportAsPDF($"{desktop}\\Meal times.pdf", UserDataExchanger.GetUser(), MealTimeStatus.MealTimeModel.GetMealTimes(), MealTimeStatus.CalculateCommonCalories());
         }
 
 
